@@ -25,7 +25,7 @@ This document explains how DevBox is built and how to work on it. For the user-f
 
 ## 1. Overview and principles
 
-DevBox is a personal toolbox of 80 developer utilities served as a single Next.js app. Every tool runs entirely in the browser.
+DevBox is a personal toolbox of 81 developer utilities served as a single Next.js app. Every tool runs entirely in the browser.
 
 The rules that shape every design decision:
 
@@ -37,12 +37,14 @@ The rules that shape every design decision:
 
 ## 2. Getting started
 
-Requirements: Node.js 20 or later and npm. The repo also has a `yarn.lock`, but the scripts below use npm.
+Requirements: Node.js 20 or later and npm. npm is the only supported package manager: `package-lock.json` is the lockfile, and there is no Yarn or pnpm configuration.
 
 ```bash
 npm install
 npm run dev      # http://localhost:3000
 npm run lint     # eslint (next core-web-vitals + typescript rules)
+npm test         # vitest, runs src/**/*.test.ts once (npm run test:watch to watch)
+npm run test:e2e # playwright: builds, serves the production output and drives Chromium
 npm run build    # runs scripts/build-sw.mjs first, then next build
 npm start        # serve the production build
 ```
@@ -52,7 +54,8 @@ Notes for local development:
 - The service worker is only registered in production builds. In `next dev` it is skipped so it never fights Fast Refresh or serves stale responses.
 - The CSP adds `'unsafe-eval'` and WebSocket origins in development only, for React DevTools and hot module reload.
 - `next dev` rewrites `AGENTS.md`. If it shows up as a change, commit it with your work rather than reverting it.
-- There is no test suite yet. Linting and a production build are the current checks.
+- Unit tests use Vitest in a plain Node environment (no DOM) and live beside the logic they cover as `src/lib/tools/<name>.test.ts`. `vitest.config.mts` maps the `@/` alias to `src/`. Logic modules are the place for unit tests.
+- Browser tests use Playwright (`e2e/*.spec.ts`, `playwright.config.ts`). They run against `next start` on port 3457 because the service worker and the security headers only exist in production. The config builds first; set `PW_SKIP_BUILD=1` to reuse an existing `.next` while iterating. Chromium is the only configured browser. Use them for behaviour that unit tests cannot see: focus order, live regions, downloads, the mobile layout, storage and network audits, and offline loads.
 
 ## 3. Project structure
 
@@ -65,6 +68,10 @@ Notes for local development:
 ├── eslint.config.mjs          next core-web-vitals + typescript presets
 ├── postcss.config.mjs         Tailwind v4 via @tailwindcss/postcss
 ├── tsconfig.json              strict TS, "@/*" -> "./src/*"
+├── vitest.config.mts          unit test runner config (Node environment, "@/" alias)
+├── playwright.config.ts       browser test runner config (production server on :3457)
+├── e2e/                       Playwright specs
+├── CASE_STUDY.md              write-up of the Workflows MVP
 ├── public/
 │   ├── icons/                 generated PWA icons (192/512, normal and maskable)
 │   └── sw.js                  GENERATED service worker, do not edit by hand
@@ -113,7 +120,8 @@ Notes for local development:
     │   ├── limits.ts          shared input caps
     │   ├── tool-metadata.ts   builds Next Metadata from the registry
     │   ├── utils.ts           cn() class joiner
-    │   └── tools/             pure logic modules, one per tool (no React)
+    │   └── tools/             pure logic modules, one per tool (no React), plus
+    │                          workflow.ts (the Workflows engine) and colocated *.test.ts
     └── types/tool.ts          ToolDefinition, ToolCategory, ToolWithRoute
 ```
 
@@ -214,6 +222,14 @@ If the tool needs a heavy third-party library, load it on demand inside an effec
 ```ts
 import("sql-formatter").then((mod) => { /* use mod.format */ });
 ```
+
+### Workflows
+
+`src/lib/tools/workflow.ts` is the first step towards DevBox Workflows: fixed pipelines that chain existing tool logic. The MVP has one workflow, JSON → JSONPath → CSV, exposed as the `workflow-json-csv` tool. It follows the same layering as every other tool:
+
+- **Engine.** `runJsonToCsvWorkflow({ json, jsonPath, delimiter })` composes `parseJson`, `queryJsonPath` and `jsonToCsv` without changing them. It returns `{ ok: true, csv, columns, rowCount, matchCount, unwrapped, progress }` or `{ ok: false, step, code, error, progress }`, where `step` is `input`, `parse`, `select` or `convert` and `code` is a stable reason such as `invalid-json`, `no-matches` or `not-tabular`. `progress` records what the completed stages found (root type, top-level keys, match and row counts) so the UI can explain a failure in a later stage. A single match whose value is an array (`$.users`) is unwrapped into rows; several matches (`$.users[*]`) become one row each.
+- **UI.** `src/components/tools/workflow-json-csv-tool.tsx` renders a three-step pipeline status, the JSON input, the expression and delimiter, and the CSV output with Copy and Download. The error for the failing step is rendered inside an `aria-live` region and linked to the offending control with `aria-describedby`. Download builds a Blob from the in-memory string; nothing is uploaded.
+- **Not yet.** There is no generic step editor, no persistence of workflows, and only this one pipeline. Adding another workflow means another engine function with the same result shape and its own tool entry.
 
 ## 7. Shared building blocks
 
@@ -348,6 +364,7 @@ Everything runs synchronously on the user's main thread, so limits exist to keep
 - Image limits are in `src/lib/tools/canvas.ts` (section 7).
 - The Regex Tester evaluates patterns in a Web Worker (`src/lib/tools/regex.worker.ts`) through `useRegexWorker`. Requests are debounced, and if an evaluation exceeds 1.5 seconds the worker is terminated and the tool reports probable catastrophic backtracking. Without Worker support it falls back to synchronous evaluation.
 - Tools that can be driven by sliders use `useDebounced` so expensive recomputation waits for the value to settle.
+- The JSON → JSONPath → CSV workflow (`src/lib/tools/workflow.ts`) checks `WORKFLOW_LIMITS` (input size, expression length, rows, distinct columns, cells and output size) before building any CSV text, so a sparse selection cannot explode into a huge table.
 
 If a new tool can be made slow by adversarial input, add a bounded limit or move the work to a worker rather than trusting the input.
 
@@ -370,6 +387,8 @@ Within tools, prefer returning typed error results from logic functions and rend
 | `npm run build` | npm runs `prebuild` (`scripts/build-sw.mjs`) automatically, then `next build`. Every route is statically generated. |
 | `npm start` | Serves the production output with the headers from `next.config.ts`. |
 | `npm run lint` | ESLint with the Next core-web-vitals and TypeScript presets. |
+| `npm test` | Vitest, single run of `src/**/*.test.ts`. `npm run test:watch` keeps it watching. |
+| `npm run test:e2e` | Playwright. Runs `npm run build`, starts `next start -p 3457`, drives Chromium through `e2e/*.spec.ts`. |
 | `node scripts/generate-icons.mjs` | Regenerates PWA icons and the Apple touch icon. Manual, commit the output. |
 
 The app is designed for Vercel: static output served from the CDN, `headers()` applied at the edge, and the service worker version taken from `VERCEL_GIT_COMMIT_SHA` when present. Any static host that can set response headers will also work; without the headers the app still functions but loses the CSP and the no-cache rule for `sw.js`.
@@ -393,6 +412,7 @@ Before opening a pull request:
 - [ ] Registry entry added with category, keywords and icon. README tool table updated.
 - [ ] No new network calls, storage keys holding user data, or CSP origins.
 - [ ] Inputs are bounded and hostile input cannot hang the tab.
-- [ ] `npm run lint` and `npm run build` pass.
+- [ ] `npm test`, `npm run lint` and `npm run build` pass. New logic in `src/lib/tools/` has a colocated `*.test.ts`.
+- [ ] `npm run test:e2e` passes when the change touches a tool's UI, keyboard behaviour, downloads or the PWA.
 - [ ] `public/sw.js` was not hand-edited. Worker changes go in `scripts/build-sw.mjs`.
 - [ ] If the icon changed, icons were regenerated and committed.

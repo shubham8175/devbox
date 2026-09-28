@@ -4,7 +4,7 @@ import {
   Ratio, MonitorSmartphone, FileType2, Table2, FileJson2, FileCode2, ShieldCheck, Cookie, ListTree, SlidersHorizontal, FileDiff, FileCheck2,
   EyeOff, Languages, AlignLeft, Link, Tags, PackageSearch, GitCommitHorizontal, FileX2, GitPullRequestArrow, Bug, ScrollText, DatabaseZap,
   Layers, Brackets, Route, KeySquare, ShieldAlert, FileDigit, Minimize2, Scaling, RefreshCw, FileImage, AppWindow, Ruler, Blend, BoxSelect,
-  Tag, Share2, Smartphone, ExternalLink, MapPin, Compass, Network, Hash as HashIcon, Calculator, Cpu, Sparkles, ListOrdered, TimerReset,
+  Tag, Share2, Smartphone, ExternalLink, MapPin, Compass, Network, Hash as HashIcon, Calculator, Cpu, Sparkles, ListOrdered, TimerReset, Workflow,
 } from "lucide-react";
 import type { ToolCategory, ToolDefinition, ToolWithRoute } from "@/types/tool";
 
@@ -58,6 +58,7 @@ const definitions: ToolDefinition[] = [
   { id: "object-flatten", name: "Flatten / Unflatten", description: "Flatten nested objects to dot paths and back.", category: "JSON & Data", keywords: ["flatten", "unflatten", "object", "nested", "dot", "path", "keys", "json"], icon: Layers },
   { id: "array", name: "Array Toolbox", description: "Dedupe, sort, group and extract from JSON arrays.", category: "JSON & Data", keywords: ["array", "json", "dedupe", "sort", "group by", "extract", "duplicates", "filter", "list"], icon: Brackets },
   { id: "jsonpath", name: "JSONPath Tester", description: "Query JSON with JSONPath expressions.", category: "JSON & Data", keywords: ["jsonpath", "json", "path", "query", "$", "filter", "select", "expression"], icon: Route },
+  { id: "workflow-json-csv", name: "Workflow: JSON → CSV", description: "Pipeline: parse JSON, select rows with JSONPath, export CSV.", category: "JSON & Data", keywords: ["workflow", "pipeline", "json", "jsonpath", "csv", "export", "extract", "convert", "spreadsheet", "table", "select", "flow"], icon: Workflow },
   // ---- Encoding
   { id: "base64", name: "Base64", description: "Encode and decode Base64 with full Unicode support.", category: "Encoding", keywords: ["base64", "encode", "decode", "binary", "text"], icon: Binary, popular: true },
   { id: "escape", name: "Escape / Unescape", description: "JSON, HTML, URL and Unicode escaping, plus whitespace view.", category: "Encoding", keywords: ["escape", "unescape", "json", "html", "entities", "unicode", "url", "newline", "whitespace"], icon: Quote },
