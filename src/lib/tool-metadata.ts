@@ -8,6 +8,13 @@ export function toolMetadata(id: string): Metadata {
   return {
     title: tool.name,
     description: tool.description,
-    keywords: tool.keywords,
+    alternates: { canonical: tool.href },
+    openGraph: {
+      type: "website",
+      title: `${tool.name} · DevBox`,
+      description: tool.description,
+      url: tool.href,
+    },
+    twitter: { card: "summary", title: `${tool.name} · DevBox`, description: tool.description },
   };
 }

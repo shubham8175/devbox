@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/app-shell";
+import { SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,11 +15,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "DevBox",
+    default: "DevBox — Free Online Developer Tools",
     template: "%s · DevBox",
   },
-  description: "Developer tools without the noise. Everything runs locally in your browser.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "DevBox",
+    title: "DevBox — Free Online Developer Tools",
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+  },
+  twitter: { card: "summary", title: "DevBox — Free Online Developer Tools", description: SITE_DESCRIPTION },
   applicationName: "DevBox",
   formatDetection: { telephone: false, email: false, address: false },
   appleWebApp: {
