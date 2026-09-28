@@ -177,7 +177,7 @@ function PathList({ title, paths, total }: { title: string; paths: string[]; tot
       {paths.length ? (
         <ul className="max-h-40 space-y-0.5 overflow-y-auto font-mono text-xs text-fg-muted">
           {paths.map((p) => (
-            <li key={p} className="truncate">
+            <li key={p} className="break-all">
               {p}
             </li>
           ))}
@@ -205,17 +205,23 @@ function TreeNode({ value, path, name, depth, defaultOpen }: { value: JsonValue;
 
   return (
     <div style={{ paddingLeft: depth ? 14 : 0 }}>
-      <div className="group flex items-center gap-1 rounded px-1 py-0.5 hover:bg-surface-hover">
+      <div className="group flex items-start gap-1 rounded px-1 py-0.5 hover:bg-surface-hover">
         {isContainer ? (
-          <button type="button" onClick={() => setOpen((o) => !o)} className="flex h-4 w-4 items-center justify-center text-fg-subtle cursor-pointer" aria-label={open ? "Collapse" : "Expand"}>
+          <button type="button" onClick={() => setOpen((o) => !o)} className="flex h-4 w-4 shrink-0 items-center justify-center text-fg-subtle cursor-pointer" aria-label={open ? "Collapse" : "Expand"}>
             {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
         ) : (
-          <span className="w-4" />
+          <span className="w-4 shrink-0" />
         )}
-        <CopyButton value={path || "(root)"} iconOnly className="hidden h-5 w-5 group-hover:inline-flex" label="Copy path" toastMessage="Path copied" />
-        <span className="text-accent-strong">{name}</span>
-        <span className="text-fg-subtle">:</span>
+        <CopyButton
+          value={path || "(root)"}
+          iconOnly
+          className="-my-0.5 h-5 w-5 shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+          label="Copy path"
+          toastMessage="Path copied"
+        />
+        <span className="shrink-0 break-all text-accent-strong">{name}</span>
+        <span className="shrink-0 text-fg-subtle">:</span>
         {isContainer ? (
           <span className="text-fg-subtle">
             {summary}

@@ -40,17 +40,17 @@ export function AndroidIntentTool() {
             <div className="space-y-2">
               {f.extras.length === 0 ? <p className="text-xs text-fg-subtle">No extras.</p> : null}
               {f.extras.map((e, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Select value={e.type} onChange={(ev) => setExtra(i, { type: ev.target.value as IntentExtra["type"] })} className="w-28 shrink-0" aria-label="Extra type">
+                <div key={i} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)_auto]">
+                  <Select value={e.type} onChange={(ev) => setExtra(i, { type: ev.target.value as IntentExtra["type"] })} className="min-w-0" aria-label="Extra type">
                     {EXTRA_TYPES.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.label}
                       </option>
                     ))}
                   </Select>
-                  <Input mono value={e.key} onChange={(ev) => setExtra(i, { key: ev.target.value })} placeholder="key" aria-label="Extra key" />
-                  <Input mono value={e.value} onChange={(ev) => setExtra(i, { value: ev.target.value })} placeholder="value" aria-label="Extra value" />
-                  <Button size="icon" variant="ghost" onClick={() => set("extras", f.extras.filter((_, j) => j !== i))} aria-label="Remove extra">
+                  <Input mono value={e.key} onChange={(ev) => setExtra(i, { key: ev.target.value })} placeholder="key" aria-label="Extra key" className="order-3 col-span-2 sm:order-none sm:col-span-1" />
+                  <Input mono value={e.value} onChange={(ev) => setExtra(i, { value: ev.target.value })} placeholder="value" aria-label="Extra value" className="order-4 col-span-2 sm:order-none sm:col-span-1" />
+                  <Button size="icon" variant="ghost" className="order-2 sm:order-none" onClick={() => set("extras", f.extras.filter((_, j) => j !== i))} aria-label="Remove extra">
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>

@@ -43,7 +43,7 @@ export function BoxShadowTool() {
           <div className="space-y-3">
             {layers.map((l, i) => (
               <div key={i} className="rounded-lg border bg-bg-elevated p-3">
-                <div className="mb-2 flex items-center gap-2">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
                   <Badge tone="accent">Layer {i + 1}</Badge>
                   <label className="flex items-center gap-1.5 text-xs text-fg-muted cursor-pointer">
                     <input type="checkbox" checked={l.inset} onChange={(e) => patch(i, { inset: e.target.checked })} className="accent-accent" /> inset
@@ -53,7 +53,7 @@ export function BoxShadowTool() {
                       <input type="color" value={l.color} onChange={(e) => patch(i, { color: e.target.value })} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" aria-label={`Layer ${i + 1} color`} />
                       <span className="block h-full w-full" style={{ backgroundColor: l.color }} />
                     </label>
-                    <Input mono value={l.color} onChange={(e) => /^#[0-9a-f]{0,6}$/i.test(e.target.value) && patch(i, { color: e.target.value })} className="h-7 w-24 text-xs" aria-label={`Layer ${i + 1} hex`} />
+                    <Input mono value={l.color} onChange={(e) => /^#[0-9a-f]{0,6}$/i.test(e.target.value) && patch(i, { color: e.target.value })} className="h-7 w-22 text-xs" aria-label={`Layer ${i + 1} hex`} />
                     <Button size="icon" variant="ghost" onClick={() => remove(i)} disabled={layers.length <= 1} aria-label="Remove layer">
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>

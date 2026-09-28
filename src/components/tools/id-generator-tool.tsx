@@ -123,7 +123,7 @@ export function IdGeneratorTool() {
             {ids.map((id, i) => (
               <li key={`${id}-${i}`} className="flex items-center gap-2 rounded-lg border bg-bg-elevated px-3 py-1.5">
                 <span className="w-7 shrink-0 text-right font-mono text-[11px] text-fg-subtle">{i + 1}</span>
-                <span className="min-w-0 flex-1 truncate font-mono text-sm">{id}</span>
+                <span className="min-w-0 flex-1 break-all font-mono text-sm">{id}</span>
                 <CopyButton value={id} iconOnly />
               </li>
             ))}

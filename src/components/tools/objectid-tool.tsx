@@ -96,8 +96,8 @@ export function ObjectIdTool() {
         />
         <div className="space-y-2">
           {generated.map((id, i) => (
-            <div key={id} className="flex items-center gap-2 rounded-lg border bg-bg-elevated px-3 py-2">
-              <span className="min-w-0 flex-1 truncate font-mono text-sm">{id}</span>
+            <div key={id} className="flex flex-wrap items-center gap-2 rounded-lg border bg-bg-elevated px-3 py-2">
+              <span className="min-w-0 flex-1 basis-48 break-all font-mono text-sm">{id}</span>
               {i === 0 ? <Badge tone="accent">latest</Badge> : null}
               <Button size="sm" variant="ghost" onClick={() => setInput(id)}>
                 Decode

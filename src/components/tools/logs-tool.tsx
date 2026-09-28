@@ -141,14 +141,14 @@ function LogRow({ entry, query, open, onToggle }: { entry: LogEntry; query: stri
         tabIndex={expandable ? 0 : undefined}
         onClick={expandable ? onToggle : undefined}
         onKeyDown={expandable ? (ev) => (ev.key === "Enter" || ev.key === " ") && onToggle() : undefined}
-        className={cn("flex items-start gap-2 px-2 py-1", expandable && "cursor-pointer hover:bg-surface-hover")}
+        className={cn("flex flex-wrap items-start gap-x-2 gap-y-0.5 px-2 py-1", expandable && "cursor-pointer hover:bg-surface-hover")}
       >
         <span className="w-3 shrink-0 pt-0.5 text-fg-subtle">{expandable ? open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" /> : null}</span>
-        {entry.timestamp ? <span className="shrink-0 text-fg-subtle">{entry.timestamp}</span> : null}
+        {entry.timestamp ? <span className="min-w-0 break-all text-fg-subtle sm:shrink-0">{entry.timestamp}</span> : null}
         <Badge tone={style.badge} className="shrink-0 font-mono">
           {entry.level}
         </Badge>
-        <span className="min-w-0 flex-1 whitespace-pre-wrap break-all">
+        <span className="order-last min-w-0 flex-1 basis-full whitespace-pre-wrap break-all sm:order-none sm:basis-0">
           <Highlight text={entry.json ? entry.message : entry.raw} query={query} />
         </span>
         {entry.json ? <Badge className="shrink-0">JSON</Badge> : null}

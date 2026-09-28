@@ -95,9 +95,9 @@ export function GitDiffTool() {
             return (
               <div key={i} id={`diff-file-${i}`} className="shadow-card overflow-hidden rounded-card border bg-surface">
                 <button type="button" onClick={() => toggle(i)} className="flex w-full items-center gap-2 px-4 py-2.5 text-left hover:bg-surface-hover cursor-pointer" aria-expanded={open}>
-                  {open ? <ChevronDown className="h-4 w-4 text-fg-subtle" /> : <ChevronRight className="h-4 w-4 text-fg-subtle" />}
-                  <meta.Icon className="h-4 w-4 text-fg-subtle" />
-                  <span className="min-w-0 flex-1 truncate font-mono text-sm">{f.status === "renamed" ? `${f.oldPath} → ${f.newPath}` : f.newPath === "/dev/null" ? f.oldPath : f.newPath}</span>
+                  {open ? <ChevronDown className="h-4 w-4 shrink-0 text-fg-subtle" /> : <ChevronRight className="h-4 w-4 shrink-0 text-fg-subtle" />}
+                  <meta.Icon className="h-4 w-4 shrink-0 text-fg-subtle" />
+                  <span className="min-w-0 flex-1 break-all font-mono text-sm">{f.status === "renamed" ? `${f.oldPath} → ${f.newPath}` : f.newPath === "/dev/null" ? f.oldPath : f.newPath}</span>
                   <Badge tone={meta.tone}>{meta.label}</Badge>
                   <span className="font-mono text-xs text-success">+{f.added}</span>
                   <span className="font-mono text-xs text-danger">−{f.removed}</span>

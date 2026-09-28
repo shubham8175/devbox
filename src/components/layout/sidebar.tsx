@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, PanelLeftClose, PanelLeftOpen, Search, Star, X } from "lucide-react";
@@ -82,6 +83,38 @@ function CategorySection({
 
 export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
+  const drawerRef = useRef<HTMLElement>(null);
+
+  // Mobile drawer: lock page scroll, move focus in, and restore it on close.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    drawerRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !drawerRef.current) return;
+      const focusables = Array.from(
+        drawerRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex='-1'])"),
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", trap);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", trap);
+      previous?.focus?.();
+    };
+  }, [mobileOpen]);
   const { open } = useCommandPalette();
   const collapsed = useSidebarCollapsed();
   const favorites = useFavorites();
@@ -99,7 +132,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
 
   const nav = (compact: boolean) => (
     <>
-      <div className={cn("flex items-center pt-4 pb-3", compact ? "flex-col gap-2 px-2" : "justify-between px-4")}>
+      <div className={cn("flex shrink-0 items-center pt-4 pb-3", compact ? "flex-col gap-2 px-2" : "justify-between px-4")}>
         <Link href="/" className="flex items-center gap-2.5" onClick={onMobileClose} title="DevBox home">
           <Logo />
           {compact ? null : <span className="text-sm font-semibold tracking-tight">DevBox</span>}
@@ -126,7 +159,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         </div>
       </div>
 
-      <div className={cn("pb-3", compact ? "px-2" : "px-3")}>
+      <div className={cn("shrink-0 pb-3", compact ? "px-2" : "px-3")}>
         <button
           type="button"
           onClick={() => {
@@ -152,7 +185,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         </button>
       </div>
 
-      <nav className={cn("flex-1 overflow-y-auto pb-4", compact ? "px-2" : "px-3")} aria-label="Tools">
+      <nav className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4", compact ? "px-2" : "px-3")} aria-label="Tools">
         <Link
           href="/"
           onClick={onMobileClose}
@@ -246,7 +279,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "sticky top-0 hidden h-screen shrink-0 flex-col border-r bg-bg-elevated transition-[width] duration-200 lg:flex",
+          "sticky top-0 hidden h-dvh shrink-0 flex-col border-r bg-bg-elevated transition-[width] duration-200 lg:flex",
           collapsed ? "w-16" : "w-64",
         )}
       >
@@ -255,9 +288,14 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
 
       {/* Mobile drawer */}
       {mobileOpen ? (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onMobileClose} />
-          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r bg-bg-elevated shadow-2xl animate-fade-in">{nav(false)}</aside>
+          <aside
+            ref={drawerRef}
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r bg-bg-elevated pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pt-[env(safe-area-inset-top)] shadow-2xl animate-fade-in"
+          >
+            {nav(false)}
+          </aside>
         </div>
       ) : null}
     </>

@@ -111,7 +111,7 @@ function CommandPalettePanel({ onOpenChange }: Pick<CommandPaletteProps, "onOpen
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[10vh] backdrop-blur-[2px] sm:pt-[14vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(2.5rem,calc(env(safe-area-inset-top)+1.5rem))] backdrop-blur-[2px] sm:pt-[14vh]"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onOpenChange(false);
       }}
@@ -119,7 +119,7 @@ function CommandPalettePanel({ onOpenChange }: Pick<CommandPaletteProps, "onOpen
       aria-modal="true"
       aria-label="Command palette"
     >
-      <div className="flex max-h-[70vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border-strong bg-surface shadow-2xl animate-fade-in">
+      <div className="flex max-h-[calc(100dvh-4.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border-strong bg-surface shadow-2xl animate-fade-in sm:max-h-[70dvh]">
         <div className="flex h-11 shrink-0 items-center gap-2.5 border-b px-3.5">
           <Search className="h-4 w-4 shrink-0 text-fg-subtle" />
           <input
@@ -210,8 +210,8 @@ function CommandPalettePanel({ onOpenChange }: Pick<CommandPaletteProps, "onOpen
             ))
           )}
         </ul>
-        <div className="flex shrink-0 items-center justify-between border-t px-3.5 py-1.5 text-[11px] text-fg-subtle">
-          <div className="flex items-center gap-3">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t px-3.5 py-1.5 text-[11px] text-fg-subtle">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="flex items-center gap-1">
               <Kbd>↑</Kbd>
               <Kbd>↓</Kbd> navigate

@@ -81,11 +81,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <ToastProvider>
       <CommandPaletteContext.Provider value={{ open: openPalette }}>
-        <div className="flex flex-1">
+        <div className="flex min-w-0 flex-1">
           <Sidebar mobileOpen={mobileNavOpen} onMobileClose={() => setMobileNavOpen(false)} />
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-w-0 flex-1 flex-col pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
             <MobileHeader onMenu={() => setMobileNavOpen(true)} />
-            <main className="flex-1 px-4 py-6 sm:px-8 sm:py-8 lg:px-10">{children}</main>
+            <main className="min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-8 lg:px-10">{children}</main>
             <footer className="flex flex-col items-center gap-1.5 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-center text-[11px] text-fg-subtle sm:px-8">
               <OfflineIndicator />
               <span>Your data stays in your browser. Nothing is uploaded or stored.</span>

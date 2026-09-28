@@ -163,7 +163,7 @@ const ROW_BG: Record<DiffRow["kind"], { l: string; r: string }> = {
 function SideBySide({ rows }: { rows: DiffRow[] }) {
   return (
     <div className="overflow-x-auto rounded-lg border bg-bg-elevated">
-      <table className="w-full table-fixed border-collapse font-mono text-xs leading-5">
+      <table className="w-full min-w-[36rem] table-fixed border-collapse font-mono text-xs leading-5 md:min-w-0">
         <tbody>
           {rows.map((r, i) => (
             <tr key={i} className="border-b last:border-b-0">

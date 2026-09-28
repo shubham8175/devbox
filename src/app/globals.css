@@ -95,6 +95,40 @@ body {
   border-color: var(--border);
 }
 
+/*
+ * Grid items default to min-width:auto, so a wide <pre>, table or long token
+ * inside a card widens the whole column and the page. Let items shrink so
+ * long content scrolls or wraps inside its own container instead.
+ */
+.grid > *,
+.inline-grid > * {
+  min-width: 0;
+}
+
+/* Long unbroken tokens (URLs, hashes, tokens) never widen the page. */
+main,
+pre,
+code,
+samp {
+  overflow-wrap: anywhere;
+}
+pre {
+  max-width: 100%;
+}
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+/* Native form controls keep their intrinsic width unless told otherwise; cap them. */
+input,
+select,
+textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+
 ::selection {
   background: var(--accent-soft);
 }

@@ -118,28 +118,33 @@ export function HttpHeadersTool() {
               <EmptyState title="No headers match" className="py-6" />
             ) : (
               <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full text-sm">
+                <table className="w-full table-fixed text-sm">
+                  <colgroup>
+                    <col className="w-[38%] sm:w-[30%]" />
+                    <col />
+                    <col className="w-11" />
+                  </colgroup>
                   <thead className="bg-surface-hover text-left text-[11px] uppercase tracking-wide text-fg-subtle">
                     <tr>
                       <th className="px-3 py-2 font-medium">Name</th>
                       <th className="px-3 py-2 font-medium">Value</th>
-                      <th className="w-10 px-3 py-2" />
+                      <th className="px-1 py-2" />
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {visible.map((h, i) => (
                       <tr key={`${h.name}-${i}`} className="bg-bg-elevated align-top">
-                        <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-accent-strong">
-                          <div className="flex items-center gap-1.5">
+                        <td className="break-words px-3 py-2 font-mono text-xs text-accent-strong">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <Highlight text={h.name} query={search} />
                             {h.count > 1 ? <Badge tone="warning">×{h.count}</Badge> : null}
                           </div>
-                          {h.description ? <div className="mt-0.5 max-w-[220px] whitespace-normal font-sans text-[11px] text-fg-subtle">{h.description}</div> : null}
+                          {h.description ? <div className="mt-0.5 font-sans text-[11px] text-fg-subtle">{h.description}</div> : null}
                         </td>
                         <td className="break-all px-3 py-2 font-mono text-xs">
                           <Highlight text={h.value} query={search} />
                         </td>
-                        <td className="px-2 py-1 text-right">
+                        <td className="px-1 py-1 text-right">
                           <CopyButton value={h.value} iconOnly />
                         </td>
                       </tr>

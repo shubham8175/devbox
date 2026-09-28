@@ -17,11 +17,11 @@ export function UpdateBanner() {
   if (!updateAvailable || dismissed) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4 pb-[env(safe-area-inset-bottom)] sm:justify-start sm:pl-4">
-      <div className="pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-lg border border-border-strong bg-surface/95 px-3.5 py-3 text-sm shadow-lg backdrop-blur animate-toast-in">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-[max(1rem,env(safe-area-inset-left))] pb-[env(safe-area-inset-bottom)] sm:justify-start">
+      <div className="pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-3 rounded-lg border border-border-strong bg-surface/95 px-3.5 py-3 text-sm shadow-lg backdrop-blur animate-toast-in">
         <RefreshCw className="h-4 w-4 shrink-0 text-accent-strong" />
-        <p className="flex-1 text-fg">A new version of DevBox is available.</p>
-        <div className="flex shrink-0 items-center gap-1.5">
+        <p className="min-w-0 flex-1 basis-40 text-fg">A new version of DevBox is available.</p>
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
           <Button size="sm" variant="ghost" onClick={() => setDismissed(true)}>
             Later
           </Button>

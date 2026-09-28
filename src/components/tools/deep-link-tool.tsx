@@ -74,11 +74,11 @@ export function DeepLinkTool() {
             <div className="space-y-2">
               {fields.params.length === 0 ? <p className="text-xs text-fg-subtle">No parameters.</p> : null}
               {fields.params.map((p, i) => (
-                <div key={i} className="flex items-center gap-2">
+                <div key={i} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto]">
                   <Input mono value={p.key} onChange={(e) => setParam(i, { key: e.target.value })} placeholder="key" aria-label={`Parameter ${i + 1} key`} />
-                  <span className="text-fg-subtle">=</span>
-                  <Input mono value={p.value} onChange={(e) => setParam(i, { value: e.target.value })} placeholder="value" aria-label={`Parameter ${i + 1} value`} />
-                  <Button size="icon" variant="ghost" onClick={() => set("params", fields.params.filter((_, j) => j !== i))} aria-label="Remove parameter">
+                  <span className="hidden text-fg-subtle sm:inline">=</span>
+                  <Input mono value={p.value} onChange={(e) => setParam(i, { value: e.target.value })} placeholder="value" aria-label={`Parameter ${i + 1} value`} className="order-3 col-span-2 sm:order-none sm:col-span-1" />
+                  <Button size="icon" variant="ghost" className="order-2 sm:order-none" onClick={() => set("params", fields.params.filter((_, j) => j !== i))} aria-label="Remove parameter">
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>

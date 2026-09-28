@@ -148,7 +148,7 @@ export function JsonDiffTool() {
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge tone={meta.tone}>{meta.label}</Badge>
-                    <span className="font-mono text-xs text-fg">{e.path}</span>
+                    <span className="min-w-0 break-all font-mono text-xs text-fg">{e.path}</span>
                   </div>
                   <div className="mt-1.5 grid gap-1 font-mono text-xs sm:grid-cols-2">
                     {e.kind !== "added" ? (

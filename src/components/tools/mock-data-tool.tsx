@@ -70,9 +70,9 @@ export function MockDataTool() {
         <div className="space-y-2">
           {fields.map((f) => (
             <div key={f.id} className="rounded-lg border bg-bg-elevated p-2">
-              <div className="flex items-center gap-2">
-                <Input mono value={f.name} onChange={(e) => update(f.id, { name: e.target.value })} placeholder="fieldName" className="h-8 flex-1 text-xs" aria-label="Field name" />
-                <Select value={f.type} onChange={(e) => update(f.id, { type: e.target.value as MockFieldType })} className="w-40 [&>select]:h-8 [&>select]:text-xs" aria-label="Field type">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:grid-cols-[minmax(0,1fr)_10rem_auto]">
+                <Input mono value={f.name} onChange={(e) => update(f.id, { name: e.target.value })} placeholder="fieldName" className="h-8 text-xs" aria-label="Field name" />
+                <Select value={f.type} onChange={(e) => update(f.id, { type: e.target.value as MockFieldType })} className="order-3 col-span-2 min-w-0 sm:order-none sm:col-span-1 [&>select]:h-8 [&>select]:text-xs" aria-label="Field type">
                   {FIELD_TYPES.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.label}

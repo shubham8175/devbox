@@ -144,7 +144,7 @@ export function SemverTool() {
           <div>
             <pre className="min-h-[160px] rounded-lg border bg-bg-elevated p-3 font-mono text-xs leading-relaxed">{sorted.valid.join("\n") || "—"}</pre>
             {sorted.invalid.length ? (
-              <p className="mt-2 text-xs text-danger">
+              <p className="mt-2 break-words text-xs text-danger">
                 Ignored {sorted.invalid.length} invalid: {sorted.invalid.join(", ")}
               </p>
             ) : null}
@@ -155,26 +155,22 @@ export function SemverTool() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="shadow-card">
           <CardHeader title="Range operators" />
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-xs">
-              <tbody className="divide-y">
-                {OPERATORS.map((o) => (
-                  <tr key={o.op} className="bg-bg-elevated align-top">
-                    <td className="whitespace-nowrap px-3 py-2 font-mono font-semibold text-accent-strong">{o.op}</td>
-                    <td className="whitespace-nowrap px-3 py-2 font-mono">{o.example}</td>
-                    <td className="px-3 py-2 text-fg-muted">{o.meaning}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="divide-y rounded-lg border bg-bg-elevated text-xs">
+            {OPERATORS.map((o) => (
+              <li key={o.op} className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 px-3 py-2 sm:grid-cols-[3.5rem_8rem_minmax(0,1fr)]">
+                <span className="font-mono font-semibold text-accent-strong">{o.op}</span>
+                <span className="font-mono">{o.example}</span>
+                <span className="col-span-2 text-fg-muted sm:col-span-1">{o.meaning}</span>
+              </li>
+            ))}
+          </ul>
         </Card>
         <Card className="shadow-card">
           <CardHeader title="Prerelease ordering" description="Lowest to highest." />
           <ol className="space-y-1.5">
             {PRERELEASE_EXAMPLES.map((p, i) => (
-              <li key={p.version} className="flex items-center gap-3 rounded-lg border bg-bg-elevated px-3 py-1.5 text-xs">
-                <span className="w-4 text-right font-mono text-fg-subtle">{i + 1}</span>
+              <li key={p.version} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded-lg border bg-bg-elevated px-3 py-1.5 text-xs">
+                <span className="w-4 shrink-0 text-right font-mono text-fg-subtle">{i + 1}</span>
                 <span className="font-mono">{p.version}</span>
                 <span className="ml-auto text-right text-fg-muted">{p.note}</span>
               </li>

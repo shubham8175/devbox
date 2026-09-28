@@ -107,19 +107,19 @@ export function QueryStringTool() {
           </Alert>
         ) : null}
         <div className="mt-4 space-y-2">
-          <div className="grid grid-cols-[1fr_1fr_auto] gap-2 px-1 text-[11px] font-medium uppercase tracking-wide text-fg-subtle">
+          <div className="hidden grid-cols-[1fr_1fr_auto] gap-2 px-1 text-[11px] font-medium uppercase tracking-wide text-fg-subtle sm:grid">
             <span>Key</span>
             <span>Value</span>
             <span className="w-[88px]" />
           </div>
           {params.map((p, i) => (
-            <div key={p.id} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+            <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-lg border p-2 sm:grid-cols-[1fr_1fr_auto] sm:rounded-none sm:border-0 sm:p-0">
               <div className="relative">
-                <Input mono value={p.key} onChange={(e) => update(p.id, { key: e.target.value })} placeholder="key" aria-label="Parameter key" />
+                <Input mono value={p.key} onChange={(e) => update(p.id, { key: e.target.value })} placeholder="key" aria-label="Parameter key" className={p.key && (keyCounts.get(p.key) ?? 0) > 1 ? "pr-12" : undefined} />
                 {p.key && (keyCounts.get(p.key) ?? 0) > 1 ? <Badge tone="accent" className="absolute right-2 top-1/2 -translate-y-1/2">dup</Badge> : null}
               </div>
-              <Input mono value={p.value} onChange={(e) => update(p.id, { value: e.target.value })} placeholder="value" aria-label="Parameter value" />
-              <div className="flex gap-0.5">
+              <Input mono value={p.value} onChange={(e) => update(p.id, { value: e.target.value })} placeholder="value" aria-label="Parameter value" className="order-3 col-span-2 sm:order-none sm:col-span-1" />
+              <div className="order-2 flex gap-0.5 sm:order-none">
                 <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up">
                   <ArrowUp className="h-3.5 w-3.5" />
                 </Button>

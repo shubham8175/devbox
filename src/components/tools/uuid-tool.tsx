@@ -42,7 +42,7 @@ export function UuidTool() {
           {uuids.map((u, i) => (
             <li key={`${u}-${i}`} className="flex items-center gap-2 rounded-lg border bg-bg-elevated px-3 py-1.5">
               <span className="w-6 shrink-0 text-right font-mono text-[11px] text-fg-subtle">{i + 1}</span>
-              <span className="min-w-0 flex-1 truncate font-mono text-sm">{u}</span>
+              <span className="min-w-0 flex-1 break-all font-mono text-sm">{u}</span>
               <CopyButton value={u} iconOnly />
             </li>
           ))}

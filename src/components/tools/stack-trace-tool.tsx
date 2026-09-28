@@ -92,7 +92,7 @@ export function StackTraceTool() {
               <div className="space-y-4">
                 {parsed.blocks.map((b, bi) => (
                   <div key={bi} className="overflow-x-auto rounded-lg border bg-bg-elevated font-mono text-xs leading-5">
-                    {b.message ? <div className="border-b bg-danger-soft/50 px-3 py-2 font-semibold text-danger">{b.message}</div> : null}
+                    {b.message ? <div className="whitespace-pre-wrap break-words border-b bg-danger-soft/50 px-3 py-2 font-semibold text-danger">{b.message}</div> : null}
                     {groupFrames(b.frames, bi).map((g) =>
                       g.kind === "app" ? (
                         <div key={g.frame.index} className={cn("flex gap-2 px-3 py-0.5", g.frame.origin === "app" ? "bg-accent-soft/40" : "")}>

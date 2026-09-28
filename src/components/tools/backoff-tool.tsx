@@ -99,11 +99,11 @@ export function BackoffTool() {
               <tbody className="divide-y">
                 {schedule.map((s) => (
                   <tr key={s.attempt} className="bg-bg-elevated">
-                    <td className="px-3 py-1.5 font-mono">#{s.attempt}</td>
-                    <td className="px-3 py-1.5 text-right font-mono text-fg-muted">{formatMs(s.baseDelay)}</td>
-                    <td className="px-3 py-1.5 text-right font-mono">{formatMs(s.delay)}</td>
-                    <td className="px-3 py-1.5 text-right font-mono text-fg-muted">{formatMs(s.cumulative)}</td>
-                    <td className="px-3 py-1.5">
+                    <td className="whitespace-nowrap px-3 py-1.5 font-mono">#{s.attempt}</td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-right font-mono text-fg-muted">{formatMs(s.baseDelay)}</td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-right font-mono">{formatMs(s.delay)}</td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-right font-mono text-fg-muted">{formatMs(s.cumulative)}</td>
+                    <td className="min-w-24 px-3 py-1.5">
                       <div className="h-2 rounded-full bg-surface-hover">
                         <div className={cn("h-2 rounded-full", s.delay >= opts.maxDelay && opts.maxDelay > 0 ? "bg-warning" : "bg-accent")} style={{ width: `${Math.max(2, (s.delay / maxBar) * 100)}%` }} />
                       </div>
