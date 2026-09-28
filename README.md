@@ -48,6 +48,10 @@ src/
 
 `src/data/tools.ts` is the single source of truth for navigation, search, routes, descriptions, keywords and categories.
 
+## Developer docs
+
+Architecture, the tool registry, how to add a tool, PWA and security details are in [DOCS.md](DOCS.md).
+
 ## Scripts
 
 ```bash
