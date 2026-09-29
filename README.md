@@ -96,9 +96,16 @@ Paste a Unix timestamp in seconds or milliseconds, or any ISO 8601 date, and get
 
 The desktop builds are not yet notarized by Apple, so both operating systems warn on first launch.
 
-- **macOS** shows "DevBox Not Opened" because the app is ad-hoc signed and not notarized. Newer macOS no longer offers "Open" from the right-click menu, and the app cannot be approved while it is still inside the disk image, so the order matters:
+- **macOS** shows the dialog below on first launch. It is expected, not a sign that the download is broken.
+
+  <img src=".github/assets/macos-not-opened.png" alt="macOS dialog: DevBox Not Opened. Apple could not verify DevBox is free of malware. Buttons: Done, Move to Bin" width="400" />
+
+  **Why it happens.** Every app downloaded from the internet is tagged by macOS as "quarantined". When you open a quarantined app, Gatekeeper checks whether Apple has notarized it, which means the developer uploaded it to Apple for an automated malware scan using a paid Apple Developer account. DevBox is a free open source project and is not enrolled in that program, so the check has no record of the app and macOS refuses to open it. The wording is generic Apple text shown for any un-notarized app, and it says nothing about what the app actually does. DevBox runs entirely on your machine, never uploads your data, and the [source](https://github.com/shubham8175/devbox) is public.
+
+  **How to open it.** Newer macOS no longer offers "Open" from the right-click menu, and the app cannot be approved while it is still inside the disk image, so the order matters:
+
   1. Drag DevBox into the Applications folder and eject the disk image.
-  2. Open DevBox from Applications. When the warning appears, click **Done**.
+  2. Open DevBox from Applications. When the warning appears, click **Done** (not **Move to Bin**).
   3. Open System Settings → Privacy & Security, scroll down, and click **Open Anyway** next to DevBox. Confirm with your password. The button only appears within about an hour of step 2.
 
   Or skip the dialogs entirely by running this in Terminal after step 1:
@@ -146,6 +153,7 @@ Every tool lives at `/tools/<id>`. The full registry is in `src/data/tools.ts`.
 | --- | --- |
 | `⌘K` / `Ctrl+K` or `/` | Open the command palette |
 | `⌘B` / `Ctrl+B` | Collapse or expand the sidebar |
+| `⌘[` / `⌘]` or `Alt+←` / `Alt+→` | Go back or forward (the desktop app also supports two-finger swipe on macOS) |
 | `Esc` | Close any overlay |
 | `g h` | Go home |
 | `g j` | JSON Toolbox |

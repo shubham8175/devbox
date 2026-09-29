@@ -28,7 +28,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const router = useRouter();
 
-  // Global shortcuts: ⌘K / Ctrl+K palette, ⌘B / Ctrl+B sidebar, "/" search, "g <key>" sequences, Esc closes overlays
+  // Global shortcuts: ⌘K / Ctrl+K palette, ⌘B / Ctrl+B sidebar, "/" search, "g <key>" sequences,
+  // ⌘[ ⌘] and Alt+←/→ history (the desktop webview has no browser toolbar), Esc closes overlays
   useEffect(() => {
     let pendingPrefix: string | null = null;
     let pendingTimer: ReturnType<typeof setTimeout> | null = null;
@@ -60,6 +61,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       } else if (mod && key === "b") {
         e.preventDefault();
         toggleSidebarCollapsed();
+      } else if ((e.metaKey && !e.ctrlKey && (e.key === "[" || e.key === "]")) || (e.altKey && !mod && (e.key === "ArrowLeft" || e.key === "ArrowRight"))) {
+        if (isEditable(e.target)) return;
+        e.preventDefault();
+        if (e.key === "[" || e.key === "ArrowLeft") router.back();
+        else router.forward();
       } else if (e.key === "/" && !mod && !isEditable(e.target)) {
         e.preventDefault();
         setPaletteOpen(true);

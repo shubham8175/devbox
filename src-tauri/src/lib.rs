@@ -15,6 +15,10 @@
 //!    instead of replacing the app inside its own window.
 //! 3. **Navigation lock.** The webview may only navigate within the app's own
 //!    origin, so nothing can turn the window into a browser for other sites.
+//! 4. **Swipe back / forward (macOS).** WKWebView ships with the two-finger
+//!    history gesture disabled and Tauri does not expose the switch, so it is
+//!    flipped on the raw view. Keyboard back / forward (⌘[ ⌘] and Alt+←/→) is
+//!    handled by the frontend in `AppShell`.
 
 use std::{collections::HashMap, path::PathBuf, sync::Mutex};
 
@@ -76,7 +80,7 @@ pub fn run() {
         .cloned()
         .expect("tauri.conf.json must declare the main window");
 
-      WebviewWindowBuilder::from_config(app.handle(), &config)?
+      let window = WebviewWindowBuilder::from_config(app.handle(), &config)?
         .on_navigation(|url| {
           if is_app_url(url) {
             return true;
@@ -133,6 +137,19 @@ pub fn run() {
           }
         })
         .build()?;
+
+      #[cfg(target_os = "macos")]
+      window.with_webview(|webview| {
+        use objc2_web_kit::WKWebView;
+        // SAFETY: `inner()` is the live WKWebView owned by wry, and Tauri runs
+        // this closure on the main thread, which is where WebKit expects calls.
+        unsafe {
+          let view: &WKWebView = &*webview.inner().cast::<WKWebView>();
+          view.setAllowsBackForwardNavigationGestures(true);
+        }
+      })?;
+      #[cfg(not(target_os = "macos"))]
+      let _ = window;
 
       Ok(())
     })

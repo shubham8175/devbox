@@ -26,3 +26,8 @@ tauri-plugin-log = "2"
 # Opens external links and deep links in the system browser / handler. Used
 # only from Rust, so nothing is exposed to the webview and no capability is needed.
 open = "5"
+
+# Only to flip WKWebView's `allowsBackForwardNavigationGestures`, which wry
+# leaves off; the same crate version wry already links, so nothing new is built.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-web-kit = { version = "0.3.2", features = ["WKWebView"] }
