@@ -4,9 +4,9 @@
 
 # DevBox
 
-**81 developer tools. One search. Nothing leaves your browser.**
+**115 developer tools. One search. Nothing leaves your browser.**
 
-Format JSON, decode a JWT, test a regex, convert cURL to code, compress an image, generate a QR code, and 75 more everyday tasks, all in one fast, local-only app. Available on the web and as a native desktop app for macOS and Windows.
+Format JSON, decode a JWT, test a regex, convert cURL to code, compress an image, generate a QR code, and 109 more everyday tasks, all in one fast, local-only app. Available on the web and as a native desktop app for macOS and Windows.
 
 [**Open the web app**](https://devbox.voyra.co.in) · [**Download for macOS**](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-macOS.dmg) · [**Download for Windows**](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-Windows-Setup.exe) · [Developer docs](DOCS.md)
 
@@ -18,7 +18,7 @@ Format JSON, decode a JWT, test a regex, convert cURL to code, compress an image
 [![Tauri](https://img.shields.io/badge/Tauri-v2-24c8db?logo=tauri&logoColor=white)](https://v2.tauri.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-<img src=".github/assets/home.png" alt="DevBox home page: sidebar of 16 categories, a search box and a grid of popular tools" width="900" />
+<img src=".github/assets/home.png" alt="DevBox home page: sidebar of 17 categories, a search box and a grid of popular tools" width="900" />
 
 </div>
 
@@ -29,7 +29,7 @@ Format JSON, decode a JWT, test a regex, convert cURL to code, compress an image
 Most online developer tools send your input to a server, wrap it in ads, and make you hunt through a different site for every task. DevBox is the opposite.
 
 - **Private by design.** Every tool runs in your browser. No accounts, no database, no backend, no analytics. Nothing you paste or upload is stored or sent anywhere. Images and QR codes are processed with the Canvas API on your machine.
-- **One place for everything.** 81 tools across 16 categories behind a single search box. Press `⌘K` and type what you want to do.
+- **One place for everything.** 115 tools across 17 categories behind a single search box. Press `⌘K` and type what you want to do, or browse the sidebar, where every category has its own icon and expands in place.
 - **Fast.** Every page is statically generated. Heavy libraries such as the SQL formatter load only on the page that needs them.
 - **Installs anywhere, works offline.** Add DevBox to your phone's home screen or your desktop's dock straight from the browser. A service worker caches every tool after the first visit, so the whole toolbox works with no connection. The same code also ships as a 10 MB native app for macOS and Windows through Tauri, with no Electron and no bundled browser.
 - **Try before you paste.** Tools ship with a **Load sample** button, so you can see real output in one click before bringing your own data.
@@ -86,6 +86,49 @@ Paste a Unix timestamp in seconds or milliseconds, or any ISO 8601 date, and get
   </tr>
 </table>
 
+### For every stack
+
+Six of the tools added in 0.2, chosen because nearly every developer reaches for them regardless of language or framework.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Markdown Preview</b><br/>
+      GitHub-flavoured rendering with tables, task lists and fenced code, an outline, and one-click export to <code>.html</code> or <code>.md</code>. HTML is sanitised before it is shown.<br/><br/>
+      <img src=".github/assets/markdown.png" alt="Markdown Preview with the editor on the left and rendered output on the right" />
+    </td>
+    <td width="50%" valign="top">
+      <b>JSON Schema Validator</b><br/>
+      Draft-07, 2019-09 and 2020-12. Every error is listed with its JSON path, the failing keyword and the line in your document, and a schema can be inferred from sample data.<br/><br/>
+      <img src=".github/assets/json-schema.png" alt="JSON Schema Validator listing errors with paths and line numbers" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <b>HTTP Request Builder</b><br/>
+      Compose method, URL, params, headers, auth and body, then copy it as cURL, fetch, Axios, HTTPie, Python or Go. Nothing is ever sent.<br/><br/>
+      <img src=".github/assets/http-request.png" alt="HTTP Request Builder generating a cURL command" />
+    </td>
+    <td width="50%" valign="top">
+      <b>Schema Visualizer</b><br/>
+      Paste SQL DDL or a Prisma schema and get an entity relationship diagram with keys and relations, plus a Mermaid export.<br/><br/>
+      <img src=".github/assets/schema-visualizer.png" alt="Schema Visualizer drawing users, posts and comments tables with relations" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Contrast Checker</b><br/>
+      WCAG AA and AAA results for normal text, large text and UI components, a live preview, and a one-click fix that finds the nearest passing colour.<br/><br/>
+      <img src=".github/assets/contrast.png" alt="Contrast Checker showing a 4.54:1 ratio with pass and fail badges" />
+    </td>
+    <td width="50%" valign="top">
+      <b>Dockerfile &amp; Compose Linter</b><br/>
+      Every instruction explained, and the usual mistakes flagged with a fix: floating tags, secrets in ENV, cache-busting COPY order, missing USER and more.<br/><br/>
+      <img src=".github/assets/docker.png" alt="Dockerfile linter listing warnings with line numbers and fixes" />
+    </td>
+  </tr>
+</table>
+
 ## Download
 
 | Platform | Download | Notes |
@@ -124,22 +167,23 @@ Every tool lives at `/tools/<id>`. The full registry is in `src/data/tools.ts`.
 
 | Category | Tools |
 | --- | --- |
-| **JSON & Data** | JSON Toolbox, JSON Diff, JSON → Types (TypeScript and Zod), CSV ↔ JSON, YAML ↔ JSON, XML ↔ JSON, Flatten / Unflatten, Array Toolbox, JSONPath, Workflow: JSON → CSV |
-| **API & HTTP** | cURL Converter (fetch, Axios, Node), API Response Inspector, HTTP Status Codes, HTTP Header Parser, Cookie Parser, Query String Builder, Pagination, Retry / Backoff |
-| **Security** | JWT Decoder, Hash, HMAC, Password Generator, Password Strength, File Checksum, .env Comparator, .env Validator |
-| **Text** | String Case, Regex Tester, Text Diff, Line & Text Toolbox, Slug, Invisible Characters, Unicode Inspector |
-| **Images & QR** | Color Picker, Metadata (EXIF), Compressor, Resizer, Format Converter, Image → Base64, App Icon Generator, Aspect Ratio, QR Generator, QR Reader |
+| **JSON & Data** | JSON Toolbox, JSON Diff, JSON → Types (TypeScript and Zod), CSV ↔ JSON, YAML ↔ JSON, XML ↔ JSON, Flatten / Unflatten, Array Toolbox, JSONPath, Workflow: JSON → CSV, JSON Schema Validator, JSON Patch |
+| **API & HTTP** | cURL Converter (fetch, Axios, Node), API Response Inspector, HTTP Status Codes, HTTP Header Parser, Cookie Parser, Query String Builder, Pagination, Retry / Backoff, HTTP Request Builder, OpenAPI Viewer, MIME Type Lookup, User-Agent Parser, GraphQL Formatter |
+| **Security** | JWT Decoder, JWT Builder, Hash, HMAC, Password Generator, Password Strength, Password Hasher (bcrypt, PBKDF2), File Checksum, .env Comparator, .env Validator, Key Pair Generator, TOTP Generator, Certificate Decoder |
+| **Text** | String Case, Regex Tester (with cheat sheet), Text Diff, Line & Text Toolbox, Slug, Invisible Characters, Unicode Inspector, Markdown Preview, Text Statistics |
+| **Images & QR** | Color Picker, Metadata (EXIF), Compressor, Resizer, Format Converter, Image → Base64, App Icon Generator, Aspect Ratio, QR Generator, QR Reader, SVG Optimizer & JSX |
 | **Time** | Epoch Converter, Date Difference, Timezone Converter, Cron Helper |
 | **Git** | Commit Builder, .gitignore Generator, Diff Viewer, Semver, npm Range Explainer |
-| **Web** | URL Toolbox, Meta Tags, Open Graph Preview, Device & Browser Info |
-| **CSS** | Color Converter, Unit Converter, Gradient, Box Shadow |
+| **DevOps** | Dockerfile & Compose Linter, CI & Kubernetes YAML Linter, nginx Location Tester |
+| **Web** | URL Toolbox, Meta Tags, Open Graph Preview, Device & Browser Info, HTML / CSS / JS Formatter (Prettier) |
+| **CSS** | Color Converter, Unit Converter, Gradient, Box Shadow, Contrast Checker, Tailwind ↔ CSS, Flexbox & Grid Playground, Cubic Bezier, clamp() Calculator |
 | **Networking & Geo** | IP / CIDR, IP ↔ Integer, IP Location, Coordinate Distance, Lat / Lng Formatter |
-| **Generators** | UUID, Random ID, Mock Data |
-| **Utilities** | Unix Permissions, File Size, GST / VAT, Number Base, Bitwise, Stack Trace Cleaner, Log Pretty Printer |
-| **MongoDB** | ObjectId, Query Formatter |
+| **Generators** | UUID, Random ID, Mock Data, Lorem Ipsum |
+| **Utilities** | Unix Permissions, File Size, GST / VAT, Number Base, Bitwise, Stack Trace Cleaner, Log Pretty Printer, Unit Converter, Scratchpad |
+| **MongoDB** | ObjectId, Query Formatter, Aggregation Explainer |
 | **Mobile** | Deep Link Builder, Android Intent URI |
-| **Encoding** | Base64, Escape / Unescape |
-| **Database** | SQL Formatter |
+| **Encoding** | Base64, Escape / Unescape, Hex Viewer, HTML Entities |
+| **Database** | SQL Formatter, SQL → ORM Schema, Connection String, Schema Visualizer |
 
 ### Workflows
 
@@ -165,16 +209,23 @@ Every tool lives at `/tools/<id>`. The full registry is in `src/data/tools.ts`.
 | `g u` | UUID Generator |
 | `g r` | Regex Tester |
 
-Star any tool to pin it to **Favorites**. Recently used tools appear on the home page. Only tool ids and UI preferences are stored in `localStorage`, never your input.
+### Navigation
+
+- **Sidebar.** Every category has an icon and a tool count. Click a category to expand its tools in place; the category of the tool you are on opens automatically and the current tool is scrolled into view.
+- **Collapsed rail.** Press `⌘B` to shrink the sidebar to a column of icons. Hover or focus a category icon to get a flyout listing its tools, so you can jump anywhere without expanding it again.
+- **Favorites and Recent.** Star any tool to pin it to the top of the sidebar and the home page. The last few tools you opened appear under **Recent** in both places.
+- **Command palette.** `⌘K` searches all 115 tools by name, description, keyword or category, with typo tolerance.
+
+Only tool ids and UI preferences (favorites, recents, theme, sidebar state) are stored in `localStorage`, never your input. The one exception is the Scratchpad, which keeps notes in this browser only after you switch that on.
 
 ## Privacy and security
 
 - **No network calls with your data, with one labelled exception.** The Content Security Policy restricts `connect-src` to the site itself plus the geolocation services used by the IP Location tool. That tool sends the address you typed to [ipwho.is](https://ipwho.is) (or [ipinfo.io](https://ipinfo.io) when that fails) when you press **Look up**, and asks [ipify](https://www.ipify.org) for your own public address when you press **Detect my IP**. Nothing is sent while typing or on page load, and reserved addresses such as 192.168.x.x are answered locally. The only other outbound request is the Open Graph preview's optional "Load remote image" button, which asks your browser to fetch a URL you typed.
-- **No storage of input.** Tool input lives in React state and is gone when you close the tab. A Playwright test types a sentinel string into a tool, triggers a download, and asserts it never appears in any request, URL, cookie, `localStorage`, `sessionStorage` or IndexedDB.
+- **No storage of input, unless you opt in.** Tool input lives in React state and is gone when you close the tab. The only exception is the Scratchpad tool: notes stay in the tab until you tick **Keep notes in this browser**, which stores them unencrypted in `localStorage` on that device; turning it off deletes them. A Playwright test types a sentinel string into a tool, triggers a download, and asserts it never appears in any request, URL, cookie, `localStorage`, `sessionStorage` or IndexedDB.
 - **The offline cache holds only the app.** The service worker caches same-origin pages and build assets so tools work offline. It never sees a request carrying your input: it ignores cross-origin requests, so the IP Location lookups pass straight through it. That tool needs a connection for public addresses; everything else works offline.
 - **Strict headers on the web build.** CSP, `X-Frame-Options`, `Referrer-Policy` and `Permissions-Policy` are set in `next.config.ts`. The desktop build applies an equivalent CSP from `src-tauri/tauri.conf.json`.
 - **Minimal desktop surface.** The Tauri shell exposes only `core:default`. No filesystem, shell, HTTP or dialog plugins reach the webview. Downloads are written to your Downloads folder by the Rust side and nothing else.
-- **Few dependencies.** Beyond React and Next: `lucide-react`, `qrcode`, `jsqr`, `yaml`, `sql-formatter` and `semver`. CSV, XML, JSONPath, EXIF, ZIP and diff logic are implemented in `src/lib/tools` and have no third-party code.
+- **Few dependencies.** Beyond React and Next: `lucide-react`, `qrcode`, `jsqr`, `yaml`, `sql-formatter`, `semver`, `prettier` (code, GraphQL formatting), `marked` and `dompurify` (Markdown preview, sanitised before render), and `bcryptjs`. Each heavy library loads only on the tool that needs it. CSV, XML, JSONPath, EXIF, ZIP, diff, ASN.1/X.509, TOTP, JSON Schema, JSON Patch, DDL parsing and the Tailwind translator are implemented in `src/lib/tools` and have no third-party code.
 
 ## Development
 

@@ -10,6 +10,7 @@ export type ToolCategory =
   | "Security"
   | "Text"
   | "Git"
+  | "DevOps"
   | "Web"
   | "CSS"
   | "Images & QR"

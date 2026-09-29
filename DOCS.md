@@ -25,13 +25,13 @@ This document explains how DevBox is built and how to work on it. For the user-f
 
 ## 1. Overview and principles
 
-DevBox is a personal toolbox of 81 developer utilities served as a single Next.js app. Every tool runs entirely in the browser.
+DevBox is a personal toolbox of 115 developer utilities served as a single Next.js app. Every tool runs entirely in the browser.
 
 The rules that shape every design decision:
 
 - **No backend.** There are no API routes, server actions or data fetching. Every route pre-renders to static HTML at build time.
 - **Nothing leaves the browser.** User input is never sent anywhere. The Content Security Policy enforces `connect-src 'self'`, so a tool cannot call an external service even by accident.
-- **Nothing user-entered is stored.** The only persisted values are UI preferences: favourite tool ids, recent tool ids, sidebar state and the theme.
+- **Nothing user-entered is stored, unless the user opts in.** The only persisted values are UI preferences: favourite tool ids, recent tool ids, sidebar state and the theme. The single exception is the Scratchpad tool, which writes notes to `localStorage` only after the user enables **Keep notes in this browser** and deletes them when it is switched off.
 - **One source of truth.** `src/data/tools.ts` defines every tool once. Navigation, search, routes, metadata, breadcrumbs and shortcuts all derive from it.
 - **Pure logic, thin UI.** Tool algorithms live in `src/lib/tools/` with no React imports. Components in `src/components/tools/` only wire state to those functions.
 
@@ -169,7 +169,7 @@ export default function Page() {
 
 - `ToastProvider` and `CommandPaletteContext`
 - the global keyboard handler (see section 9)
-- `Sidebar` (desktop, collapsible; mobile, drawer) and `MobileHeader`, each showing the `OfflineIndicator` pill when the connection drops; the sidebar ends with `InstallButton`
+- `Sidebar` (desktop, collapsible; mobile, drawer) and `MobileHeader`, each showing the `OfflineIndicator` pill when the connection drops; the sidebar ends with `InstallButton`. Expanded, it lists All tools, Favorites, Recent and one collapsible section per category, each headed by its `categoryIcons` entry; the current tool's category is always open and the active link is scrolled into view on navigation. Collapsed (`⌘B`), it becomes an icon rail where hovering or focusing a category icon opens a fixed-position flyout of that category's tools, anchored to the icon and clamped to the viewport.
 - the `<main>` column and footer with the attribution and the GitHub / LinkedIn links (`AboutFooter`)
 - `CommandPalette`, `DesktopBridge`, `ServiceWorkerRegister` and `UpdateBanner`
 
@@ -190,7 +190,8 @@ DevBox is a Progressive Web App: phones and desktops can install it from the bro
 
 | Export | Purpose |
 | --- | --- |
-| `categories` | Ordered list of the 16 categories. Drives sidebar and home page order. |
+| `categories` | Ordered list of the 17 categories. Drives sidebar and home page order. |
+| `categoryIcons` | One Lucide icon per category, used by the sidebar headers and the collapsed rail. |
 | `tools` | Every `ToolDefinition` with an added `href` of `/tools/<id>`. |
 | `popularTools` | Tools flagged `popular: true`, shown in the home page's Popular section. |
 | `getTool(id)` | Map lookup by id. |
@@ -235,6 +236,8 @@ If the tool needs a heavy third-party library, load it on demand inside an effec
 ```ts
 import("sql-formatter").then((mod) => { /* use mod.format */ });
 ```
+
+The same pattern is used for `prettier/standalone` and its plugins (code and GraphQL formatters), `marked` and `dompurify` (Markdown preview) and `bcryptjs` (password hasher). The JSON Schema validator is a small interpreter in `json-schema-engine.ts` rather than Ajv, because Ajv compiles schemas with `new Function()`, which the Content Security Policy blocks. Logic modules take the loaded module as a parameter (see `YamlModule` in `yaml-json.ts`) so they stay testable in Node by passing the real module.
 
 ### Workflows
 
@@ -298,6 +301,8 @@ import("sql-formatter").then((mod) => { /* use mod.format */ });
 | `devbox-sidebar-collapsed` | `boolean` | Desktop sidebar collapsed to icons. |
 | `devbox-sidebar-open-categories` | `string[]` | Categories the user expanded in the sidebar. |
 | `devbox-theme` | `"light" \| "dark"` | Written by `ThemeToggle`, read by the inline script in `layout.tsx`. |
+| `devbox-scratchpad-enabled` | `boolean` | Whether the Scratchpad may persist notes. Off by default. |
+| `devbox-scratchpad-notes` | `Note[]` | Scratchpad notes, present only while the flag above is on. The only key that ever holds user content; `src/lib/scratchpad-store.ts` validates every read and removes the key when persistence is disabled. |
 
 Only tool ids, booleans and the theme string ever go through storage. Never store tool input or output.
 
@@ -367,7 +372,9 @@ Security headers are set in `next.config.ts` for every route:
 Application-level guarantees:
 
 - Only one tool sends user input off the device: IP Location (`src/lib/tools/ip-lookup.ts`) posts nothing but GETs `https://ipwho.is/<address>` (falling back to `https://ipinfo.io/<address>/json`) when the user presses Look up or an example chip, and GETs ipify when the user presses Detect my IP. Requests are never issued on load or while typing, reserved addresses (RFC 1918, loopback, link-local, ULA, multicast…) are recognised locally and never sent, and every request has a 10 s timeout. All three services are free, keyless and allow browser calls; ipwho.is allows about 10,000 lookups a month per visitor IP. The only other outbound request is the image load in the Open Graph preview, triggered by the user.
-- Hashing, HMAC, checksums and password generation use the Web Crypto API in the browser.
+- Hashing, HMAC, checksums, password generation, JWT signing, key pair generation, TOTP, PBKDF2 and certificate fingerprints use the Web Crypto API in the browser. bcrypt uses the pure-JavaScript `bcryptjs`.
+- The Markdown preview is the only place HTML from user input is rendered. `marked` output passes through DOMPurify before `dangerouslySetInnerHTML`, and the SVG tool previews through an `<img>` data URL, which cannot execute scripts.
+- The Scratchpad is the one tool that may write user content to `localStorage`, and only after an explicit opt-in (section 8).
 - Error boundaries deliberately do not report errors. There is no telemetry.
 - The share target is GET-only and parsed on the client.
 - The service worker intercepts only same-origin GET requests, caches only pages and build assets, and never posts anything. No tool issues a request containing input, so nothing user-entered can reach the cache.

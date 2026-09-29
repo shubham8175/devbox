@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { REGEX_FLAGS } from "@/lib/tools/regex";
+import { COMMON_PATTERNS, REGEX_CHEATSHEET, type CommonPattern } from "@/lib/tools/regex-cheatsheet";
 import { useRegexWorker } from "@/hooks/use-regex-worker";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,8 +24,15 @@ export function RegexTool() {
   const [pattern, setPattern] = useState("");
   const [flags, setFlags] = useState<string>("g");
   const [text, setText] = useState("");
+  const [cheatOpen, setCheatOpen] = useState(false);
 
   const { result, running } = useRegexWorker(pattern, flags, text);
+
+  const applyPattern = (p: CommonPattern) => {
+    setPattern(p.pattern);
+    setFlags(p.flags);
+    if (!text.trim()) setText(p.sample);
+  };
 
   const toggleFlag = (f: string) => {
     setFlags((cur) => (cur.includes(f) ? cur.replace(f, "") : cur + f));
@@ -185,6 +194,62 @@ export function RegexTool() {
             ))}
           </div>
         )}
+      </Card>
+
+      <Card>
+        <button
+          type="button"
+          onClick={() => setCheatOpen((o) => !o)}
+          aria-expanded={cheatOpen}
+          aria-controls="regex-cheat-sheet"
+          className="flex w-full items-center justify-between gap-3 text-left cursor-pointer"
+        >
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold text-fg">Cheat sheet</h2>
+            <p className="mt-0.5 text-xs text-fg-muted">Syntax reference and common patterns. Click a pattern to load it.</p>
+          </div>
+          <ChevronDown className={cn("h-4 w-4 shrink-0 text-fg-subtle transition-transform", cheatOpen && "rotate-180")} />
+        </button>
+        {cheatOpen ? (
+          <div id="regex-cheat-sheet" className="mt-4 space-y-5">
+            <div>
+              <h3 className="mb-2 text-xs font-medium text-fg-muted">Common patterns</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {COMMON_PATTERNS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => applyPattern(p)}
+                    title={`/${p.pattern}/${p.flags}`}
+                    className={cn(
+                      "rounded-md border px-2 py-1 text-xs transition-colors cursor-pointer",
+                      pattern === p.pattern ? "border-accent/40 bg-accent-soft text-accent-strong" : "border-border bg-bg-elevated text-fg-muted hover:border-border-strong hover:text-fg",
+                    )}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {REGEX_CHEATSHEET.map((section) => (
+                <div key={section.title}>
+                  <h3 className="mb-1.5 text-xs font-medium text-fg-muted">{section.title}</h3>
+                  <dl className="divide-y rounded-lg border bg-bg-elevated">
+                    {section.rows.map((row) => (
+                      <div key={row.code} className="flex items-start gap-3 px-3 py-1.5 text-xs">
+                        <dt className="w-32 shrink-0 font-mono text-accent-strong">
+                          <code>{row.code}</code>
+                        </dt>
+                        <dd className="min-w-0 text-fg-muted">{row.description}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </Card>
     </div>
   );

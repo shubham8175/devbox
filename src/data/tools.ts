@@ -5,6 +5,9 @@ import {
   EyeOff, Languages, AlignLeft, Link, Tags, PackageSearch, GitCommitHorizontal, FileX2, GitPullRequestArrow, Bug, ScrollText, DatabaseZap,
   Layers, Brackets, Route, KeySquare, ShieldAlert, FileDigit, Minimize2, Scaling, RefreshCw, FileImage, AppWindow, Ruler, Blend, BoxSelect,
   Tag, Share2, Smartphone, ExternalLink, MapPin, Compass, Network, Hash as HashIcon, Calculator, Cpu, Sparkles, ListOrdered, TimerReset, Workflow,
+  ClipboardCheck, FileText, CodeXml, TextQuote, FileKey, Sigma, TableProperties, Cable, Boxes, Funnel, Send, BookOpenText, FileType, UserSearch,
+  Hexagon, Key, LockKeyhole, Timer, FileBadge, Grid2x2, Ampersand, Wind, LayoutGrid, Contrast, PenTool, Spline, StretchHorizontal, Container,
+  ListChecks, Server, NotebookPen, Scale, FilePen, GitBranch, Wrench, type LucideIcon,
 } from "lucide-react";
 import type { ToolCategory, ToolDefinition, ToolWithRoute } from "@/types/tool";
 
@@ -19,6 +22,7 @@ export const categories: ToolCategory[] = [
   "Security",
   "Text",
   "Git",
+  "DevOps",
   "Web",
   "CSS",
   "Images & QR",
@@ -27,6 +31,27 @@ export const categories: ToolCategory[] = [
   "Generators",
   "Utilities",
 ];
+
+/** One icon per category, used by the sidebar (expanded headers and the collapsed rail). */
+export const categoryIcons: Record<ToolCategory, LucideIcon> = {
+  Time: Clock,
+  MongoDB: Database,
+  Database: Table2,
+  "API & HTTP": Globe,
+  "JSON & Data": Braces,
+  Encoding: Binary,
+  Security: ShieldCheck,
+  Text: CaseSensitive,
+  Git: GitBranch,
+  DevOps: Container,
+  Web: AppWindow,
+  CSS: Palette,
+  "Images & QR": ImageIcon,
+  Mobile: Smartphone,
+  "Networking & Geo": Network,
+  Generators: Sparkles,
+  Utilities: Wrench,
+};
 
 const definitions: ToolDefinition[] = [
   // ---- Time
@@ -37,8 +62,12 @@ const definitions: ToolDefinition[] = [
   // ---- MongoDB
   { id: "objectid", name: "MongoDB ObjectId", description: "Decode an ObjectId's timestamp or generate new ones.", category: "MongoDB", keywords: ["mongo", "mongodb", "objectid", "object id", "mongodb id", "bson", "id", "timestamp", "generate"], icon: Database, popular: true, shortcut: "g o" },
   { id: "mongodb-query", name: "MongoDB Query Formatter", description: "Format find queries and aggregation pipelines.", category: "MongoDB", keywords: ["mongo", "mongodb", "query", "aggregate", "pipeline", "match", "group", "lookup", "project", "format", "shell"], icon: DatabaseZap },
+  { id: "mongodb-aggregation", name: "Aggregation Explainer", description: "Explain each stage of a MongoDB pipeline and flag slow patterns.", category: "MongoDB", keywords: ["mongo", "mongodb", "aggregate", "aggregation", "pipeline", "explain", "stage", "match", "lookup", "group", "unwind", "performance", "index"], icon: Funnel },
   // ---- Database
   { id: "sql", name: "SQL Formatter", description: "Format or minify SQL with syntax highlighting.", category: "Database", keywords: ["sql", "format", "minify", "query", "select", "join", "postgres", "mysql", "beautify"], icon: Table2 },
+  { id: "sql-to-orm", name: "SQL → ORM Schema", description: "Turn CREATE TABLE statements into Prisma, Drizzle, TypeORM or Mongoose.", category: "Database", keywords: ["sql", "orm", "prisma", "drizzle", "typeorm", "mongoose", "schema", "create table", "ddl", "model", "convert", "typescript"], icon: TableProperties },
+  { id: "connection-string", name: "Connection String", description: "Parse and build Postgres, MySQL, MongoDB and Redis URIs, password masked.", category: "Database", keywords: ["connection string", "database url", "postgres", "postgresql", "mysql", "mongodb", "redis", "amqp", "uri", "dsn", "parse", "build", "password"], icon: Cable },
+  { id: "schema-visualizer", name: "Schema Visualizer", description: "Tables, columns and relations from SQL DDL or a Prisma schema.", category: "Database", keywords: ["schema", "erd", "diagram", "tables", "relations", "foreign key", "prisma", "sql", "ddl", "visualize", "database", "model"], icon: Boxes },
   // ---- API & HTTP
   { id: "curl", name: "cURL Converter", description: "Turn a cURL command into fetch, Axios or Node code.", category: "API & HTTP", keywords: ["curl", "fetch", "axios", "node", "http", "request", "convert", "code"], icon: Terminal, popular: true },
   { id: "api-inspector", name: "API Response Inspector", description: "Analyse the shape, size and quirks of a JSON response.", category: "API & HTTP", keywords: ["api", "response", "json", "inspect", "analyze", "depth", "nulls", "duplicate ids", "tree", "browse"], icon: Microscope },
@@ -48,6 +77,11 @@ const definitions: ToolDefinition[] = [
   { id: "query-string", name: "Query String Builder", description: "Build and parse URLs with properly encoded parameters.", category: "API & HTTP", keywords: ["query", "string", "url", "params", "parameters", "build", "encode", "search"], icon: SlidersHorizontal },
   { id: "pagination", name: "Pagination Calculator", description: "Offset, limit, page counts and item ranges.", category: "API & HTTP", keywords: ["pagination", "page", "offset", "limit", "page size", "total", "api"], icon: ListOrdered },
   { id: "backoff", name: "Retry / Backoff Calculator", description: "Preview an exponential backoff retry schedule.", category: "API & HTTP", keywords: ["retry", "backoff", "exponential", "jitter", "delay", "resilience", "timeout"], icon: TimerReset },
+  { id: "http-request", name: "HTTP Request Builder", description: "Compose a request and get cURL, fetch, Axios, HTTPie and Python code.", category: "API & HTTP", keywords: ["http", "request", "builder", "curl", "fetch", "axios", "httpie", "python", "requests", "headers", "body", "auth", "bearer", "rest"], icon: Send },
+  { id: "openapi", name: "OpenAPI Viewer", description: "Browse endpoints, parameters and schemas of an OpenAPI or Swagger spec.", category: "API & HTTP", keywords: ["openapi", "swagger", "spec", "api", "endpoints", "paths", "schemas", "yaml", "json", "rest", "docs", "viewer"], icon: BookOpenText },
+  { id: "mime-types", name: "MIME Type Lookup", description: "Find the MIME type for an extension, or extensions for a type.", category: "API & HTTP", keywords: ["mime", "content-type", "media type", "extension", "file type", "lookup", "application/json", "image/png", "upload"], icon: FileType },
+  { id: "user-agent", name: "User-Agent Parser", description: "Browser, engine, OS and device from any User-Agent string.", category: "API & HTTP", keywords: ["user agent", "ua", "browser", "os", "device", "parse", "chrome", "safari", "firefox", "mobile", "bot", "crawler"], icon: UserSearch },
+  { id: "graphql", name: "GraphQL Formatter", description: "Format, minify and inspect GraphQL queries, mutations and schemas.", category: "API & HTTP", keywords: ["graphql", "gql", "query", "mutation", "schema", "sdl", "format", "minify", "prettify", "fragment", "variables"], icon: Hexagon },
   // ---- JSON & Data
   { id: "json", name: "JSON Toolbox", description: "Format, minify, validate and sort JSON.", category: "JSON & Data", keywords: ["json", "format", "pretty", "minify", "validate", "sort keys", "beautify"], icon: Braces, popular: true, shortcut: "g j" },
   { id: "json-diff", name: "JSON Diff", description: "Compare two JSON documents and see what changed.", category: "JSON & Data", keywords: ["json", "diff", "compare", "difference", "changes"], icon: GitCompare },
@@ -59,9 +93,13 @@ const definitions: ToolDefinition[] = [
   { id: "array", name: "Array Toolbox", description: "Dedupe, sort, group and extract from JSON arrays.", category: "JSON & Data", keywords: ["array", "json", "dedupe", "sort", "group by", "extract", "duplicates", "filter", "list"], icon: Brackets },
   { id: "jsonpath", name: "JSONPath Tester", description: "Query JSON with JSONPath expressions.", category: "JSON & Data", keywords: ["jsonpath", "json", "path", "query", "$", "filter", "select", "expression"], icon: Route },
   { id: "workflow-json-csv", name: "Workflow: JSON → CSV", description: "Pipeline: parse JSON, select rows with JSONPath, export CSV.", category: "JSON & Data", keywords: ["workflow", "pipeline", "json", "jsonpath", "csv", "export", "extract", "convert", "spreadsheet", "table", "select", "flow"], icon: Workflow },
+  { id: "json-schema", name: "JSON Schema Validator", description: "Validate JSON against a schema and see every error with its path.", category: "JSON & Data", keywords: ["json schema", "schema", "validate", "validation", "ajv", "draft-07", "2020-12", "errors", "required", "type", "json"], icon: ClipboardCheck },
+  { id: "json-patch", name: "JSON Patch", description: "Generate and apply RFC 6902 patches and RFC 7386 merge patches.", category: "JSON & Data", keywords: ["json patch", "rfc 6902", "merge patch", "rfc 7386", "diff", "apply", "operations", "add", "remove", "replace", "json"], icon: FilePen },
   // ---- Encoding
   { id: "base64", name: "Base64", description: "Encode and decode Base64 with full Unicode support.", category: "Encoding", keywords: ["base64", "encode", "decode", "binary", "text"], icon: Binary, popular: true },
   { id: "escape", name: "Escape / Unescape", description: "JSON, HTML, URL and Unicode escaping, plus whitespace view.", category: "Encoding", keywords: ["escape", "unescape", "json", "html", "entities", "unicode", "url", "newline", "whitespace"], icon: Quote },
+  { id: "hex-viewer", name: "Hex Viewer", description: "Hex dump of any text or file with offsets and an ASCII column.", category: "Encoding", keywords: ["hex", "hexdump", "xxd", "bytes", "binary", "viewer", "dump", "offset", "ascii", "file", "inspect"], icon: Grid2x2 },
+  { id: "html-entities", name: "HTML Entities", description: "Look up, encode and decode named and numeric HTML entities.", category: "Encoding", keywords: ["html", "entities", "entity", "&amp;", "&nbsp;", "encode", "decode", "escape", "symbols", "unicode", "lookup", "copyright", "arrow"], icon: Ampersand },
   // ---- Security
   { id: "jwt", name: "JWT Decoder", description: "Inspect JWT header, payload and expiry claims.", category: "Security", keywords: ["jwt", "token", "decode", "auth", "bearer", "claims", "exp", "iat"], icon: KeyRound, popular: true, shortcut: "g t" },
   { id: "hash", name: "Hash Generator", description: "SHA-1, SHA-256, SHA-384 and SHA-512 digests.", category: "Security", keywords: ["hash", "sha", "sha256", "sha512", "digest", "checksum", "crypto"], icon: Hash },
@@ -71,6 +109,11 @@ const definitions: ToolDefinition[] = [
   { id: "env-diff", name: ".env Comparator", description: "Compare two env files by key, values hidden by default.", category: "Security", keywords: ["env", ".env", "environment", "diff", "compare", "missing", "keys", "dotenv", "production", "staging"], icon: FileDiff },
   { id: "env-validator", name: ".env Validator", description: "Lint a .env file for duplicates, quoting and whitespace issues.", category: "Security", keywords: ["env", ".env", "dotenv", "validate", "lint", "duplicate", "quotes", "whitespace", "environment variables"], icon: FileDigit },
   { id: "checksum", name: "File Checksum", description: "SHA hashes of any file, computed in the browser.", category: "Security", keywords: ["checksum", "file", "sha256", "sha1", "hash", "verify", "integrity", "download"], icon: FileCheck2 },
+  { id: "jwt-sign", name: "JWT Builder", description: "Create and sign JWTs with HS256, HS384 or HS512, and verify a secret.", category: "Security", keywords: ["jwt", "sign", "encode", "create", "token", "hs256", "hs512", "secret", "verify", "claims", "exp", "auth", "bearer"], icon: FileKey },
+  { id: "keypair", name: "Key Pair Generator", description: "RSA, ECDSA and Ed25519 key pairs as PEM, JWK and OpenSSH public keys.", category: "Security", keywords: ["rsa", "ed25519", "ecdsa", "key pair", "public key", "private key", "pem", "jwk", "ssh", "generate", "openssh", "p-256"], icon: Key },
+  { id: "password-hash", name: "Password Hasher", description: "Hash and verify passwords with bcrypt or PBKDF2, in the browser.", category: "Security", keywords: ["bcrypt", "pbkdf2", "password", "hash", "verify", "salt", "rounds", "cost", "seed", "users", "compare"], icon: LockKeyhole },
+  { id: "totp", name: "TOTP Generator", description: "Time-based one-time codes from a secret or otpauth:// URI, with QR.", category: "Security", keywords: ["totp", "otp", "2fa", "mfa", "authenticator", "one time password", "otpauth", "secret", "base32", "google authenticator", "qr"], icon: Timer },
+  { id: "certificate", name: "Certificate Decoder", description: "Subject, issuer, SANs, validity and fingerprints of a PEM certificate.", category: "Security", keywords: ["certificate", "x509", "x.509", "pem", "ssl", "tls", "cert", "decode", "san", "expiry", "fingerprint", "issuer", "public key"], icon: FileBadge },
   // ---- Text
   { id: "string-case", name: "String Case", description: "Convert text between camel, snake, kebab and more.", category: "Text", keywords: ["case", "camel", "snake", "kebab", "pascal", "constant", "title", "convert", "string"], icon: CaseSensitive },
   { id: "regex", name: "Regex Tester", description: "Test regular expressions with live match highlighting.", category: "Text", keywords: ["regex", "regexp", "regular expression", "pattern", "match", "test", "groups"], icon: Regex, popular: true, shortcut: "g r" },
@@ -79,22 +122,34 @@ const definitions: ToolDefinition[] = [
   { id: "slug", name: "Slug Generator", description: "Turn any text into a clean URL slug.", category: "Text", keywords: ["slug", "url", "kebab", "seo", "permalink", "accents", "transliterate"], icon: Link },
   { id: "invisible-chars", name: "Invisible Characters", description: "Find and remove zero-width and hidden characters.", category: "Text", keywords: ["invisible", "hidden chars", "zero width", "whitespace", "unicode", "nbsp", "bom", "zwsp", "clean"], icon: EyeOff, popular: true },
   { id: "unicode", name: "Unicode Inspector", description: "Code points, UTF-8 and UTF-16 bytes for any text.", category: "Text", keywords: ["unicode", "utf-8", "utf-16", "code point", "emoji", "bytes", "escape", "character"], icon: Languages },
+  { id: "markdown", name: "Markdown Preview", description: "Live GitHub-flavoured Markdown preview with HTML export.", category: "Text", keywords: ["markdown", "md", "preview", "readme", "gfm", "render", "html", "table", "editor", "github"], icon: FileText, popular: true },
+  { id: "text-stats", name: "Text Statistics", description: "Words, characters, sentences, reading time and top words.", category: "Text", keywords: ["word count", "character count", "text", "statistics", "stats", "reading time", "sentences", "paragraphs", "frequency", "bytes", "counter"], icon: Sigma },
   // ---- Git
   { id: "git-commit", name: "Git Commit Builder", description: "Compose Conventional Commit messages.", category: "Git", keywords: ["git", "commit", "conventional", "feat", "fix", "message", "scope", "breaking change"], icon: GitCommitHorizontal },
   { id: "gitignore", name: ".gitignore Generator", description: "Combine local templates into one .gitignore.", category: "Git", keywords: ["gitignore", "git", "ignore", "node", "python", "xcode", "android", "template"], icon: FileX2 },
   { id: "git-diff", name: "Git Diff Viewer", description: "Render a raw git diff with hunks and a summary.", category: "Git", keywords: ["git", "diff", "patch", "hunk", "review", "unified", "changes"], icon: GitPullRequestArrow },
   { id: "semver", name: "Semver Tool", description: "Compare, validate, bump and sort semantic versions.", category: "Git", keywords: ["semver", "version", "bump", "major", "minor", "patch", "prerelease", "compare", "sort"], icon: Tags },
   { id: "npm-range", name: "npm Range Explainer", description: "Explain what versions a range like ^5.2.1 allows.", category: "Git", keywords: ["npm", "range", "caret", "tilde", "version", "semver", "package.json", "dependency"], icon: PackageSearch },
+  // ---- DevOps
+  { id: "docker", name: "Dockerfile & Compose Linter", description: "Explain each instruction and flag common Dockerfile and Compose mistakes.", category: "DevOps", keywords: ["docker", "dockerfile", "compose", "docker-compose", "lint", "explain", "image", "container", "from", "run", "copy", "latest", "best practices"], icon: Container },
+  { id: "yaml-lint", name: "CI & Kubernetes YAML Linter", description: "Check GitHub Actions workflows and Kubernetes manifests for common mistakes.", category: "DevOps", keywords: ["yaml", "lint", "github actions", "workflow", "kubernetes", "k8s", "manifest", "deployment", "ci", "pipeline", "validate", "unpinned", "resources"], icon: ListChecks },
+  { id: "nginx", name: "nginx Location Tester", description: "See which location block nginx picks for a URI, and test rewrites.", category: "DevOps", keywords: ["nginx", "location", "rewrite", "config", "regex", "prefix", "proxy", "match", "uri", "server block", "test"], icon: Server },
   // ---- Web
   { id: "url", name: "URL Toolbox", description: "Encode, decode and parse URLs and query strings.", category: "Web", keywords: ["url", "uri", "encode", "decode", "query", "params", "parse", "percent"], icon: Link2 },
   { id: "meta-tags", name: "Meta Tag Generator", description: "HTML meta, Open Graph and Twitter card tags.", category: "Web", keywords: ["meta", "seo", "open graph", "og", "twitter card", "head", "title", "description", "canonical"], icon: Tag },
   { id: "og-preview", name: "Open Graph Preview", description: "Preview how a link card looks on social platforms.", category: "Web", keywords: ["open graph", "og", "preview", "social", "card", "twitter", "linkedin", "slack", "share"], icon: Share2 },
   { id: "device-info", name: "Device & Browser Info", description: "What this browser reports about itself and the screen.", category: "Web", keywords: ["device", "browser", "user agent", "screen", "viewport", "dpr", "language", "timezone", "online"], icon: MonitorSmartphone },
+  { id: "code-formatter", name: "HTML / CSS / JS Formatter", description: "Format or minify HTML, CSS, JavaScript and TypeScript with Prettier.", category: "Web", keywords: ["format", "prettier", "beautify", "minify", "html", "css", "scss", "javascript", "typescript", "js", "ts", "jsx", "tsx", "code"], icon: CodeXml, popular: true },
   // ---- CSS
   { id: "color", name: "Color Converter", description: "Convert between HEX, RGB, RGBA and HSL.", category: "CSS", keywords: ["color", "colour", "hex", "rgb", "rgba", "hsl", "css", "picker"], icon: Palette },
   { id: "css-units", name: "CSS Unit Converter", description: "px, rem and em with a configurable root size.", category: "CSS", keywords: ["css", "px", "rem", "em", "units", "convert", "font size", "root"], icon: Ruler },
   { id: "gradient", name: "Gradient Generator", description: "Build linear and radial CSS gradients visually.", category: "CSS", keywords: ["css", "gradient", "linear", "radial", "color stops", "background", "angle"], icon: Blend },
   { id: "box-shadow", name: "Box Shadow Generator", description: "Tune shadows with a live preview and CSS output.", category: "CSS", keywords: ["css", "box-shadow", "shadow", "blur", "spread", "inset", "elevation"], icon: BoxSelect },
+  { id: "contrast", name: "Contrast Checker", description: "WCAG AA and AAA contrast ratios for text and background colours.", category: "CSS", keywords: ["contrast", "wcag", "accessibility", "a11y", "aa", "aaa", "ratio", "color", "colour", "text", "background", "readable"], icon: Contrast },
+  { id: "tailwind-css", name: "Tailwind ↔ CSS", description: "Translate Tailwind utility classes to CSS and CSS declarations to utilities.", category: "CSS", keywords: ["tailwind", "tailwindcss", "css", "utility", "classes", "convert", "translate", "flex", "padding", "margin", "colors"], icon: Wind },
+  { id: "flexbox-grid", name: "Flexbox & Grid Playground", description: "Tune flex and grid layouts visually and copy the CSS.", category: "CSS", keywords: ["flexbox", "flex", "grid", "css", "layout", "justify", "align", "gap", "playground", "columns", "rows", "template"], icon: LayoutGrid },
+  { id: "cubic-bezier", name: "Cubic Bezier", description: "Design easing curves with a live animation preview.", category: "CSS", keywords: ["cubic-bezier", "easing", "ease", "animation", "transition", "timing function", "curve", "css", "ease-in-out"], icon: Spline },
+  { id: "css-clamp", name: "CSS clamp() Calculator", description: "Fluid font sizes and spacing between two viewport widths.", category: "CSS", keywords: ["clamp", "fluid", "typography", "responsive", "font-size", "viewport", "vw", "rem", "css", "min", "max", "scale"], icon: StretchHorizontal },
   // ---- Images & QR
   { id: "image-color", name: "Image Color Picker", description: "Pick pixel colors and extract a palette from any image.", category: "Images & QR", keywords: ["image", "color", "picker", "palette", "dominant", "eyedropper", "pixel", "hex", "screenshot"], icon: Pipette, popular: true },
   { id: "image-metadata", name: "Image Metadata", description: "Dimensions, type, size, color profile and EXIF.", category: "Images & QR", keywords: ["image", "metadata", "exif", "dimensions", "size", "icc", "profile", "photo", "camera"], icon: ImageIcon },
@@ -106,6 +161,7 @@ const definitions: ToolDefinition[] = [
   { id: "aspect-ratio", name: "Aspect Ratio", description: "Simplify ratios and resize while keeping proportions.", category: "Images & QR", keywords: ["aspect", "ratio", "16:9", "4:3", "resize", "dimensions", "width", "height", "scale"], icon: Ratio },
   { id: "qr", name: "QR Code Generator", description: "QR codes for text, URLs, Wi-Fi, email, phone and SMS.", category: "Images & QR", keywords: ["qr", "qrcode", "generate", "wifi", "url", "sms", "email", "phone", "png", "svg"], icon: QrCode, popular: true },
   { id: "qr-reader", name: "QR Code Reader", description: "Decode a QR code from an image, screenshot or paste.", category: "Images & QR", keywords: ["qr", "read", "scan", "decode", "image", "screenshot", "paste"], icon: ScanLine },
+  { id: "svg", name: "SVG Optimizer & JSX", description: "Shrink SVG markup and convert it to a React component.", category: "Images & QR", keywords: ["svg", "optimize", "optimise", "minify", "svgo", "jsx", "react", "component", "icon", "clean", "convert", "tsx"], icon: PenTool },
   // ---- Mobile
   { id: "deep-link", name: "Deep Link Builder", description: "Build and parse custom-scheme and universal links.", category: "Mobile", keywords: ["deep link", "universal link", "app link", "scheme", "uri", "mobile", "ios", "android", "myapp://"], icon: Smartphone },
   { id: "android-intent", name: "Android Intent URI", description: "Compose intent:// URIs with package, action and fallback.", category: "Mobile", keywords: ["android", "intent", "uri", "package", "action", "category", "fallback", "chrome", "deep link"], icon: ExternalLink },
@@ -119,6 +175,7 @@ const definitions: ToolDefinition[] = [
   { id: "uuid", name: "UUID Generator", description: "Generate and validate UUIDs.", category: "Generators", keywords: ["uuid", "guid", "v4", "generate", "validate", "random"], icon: Fingerprint, popular: true, shortcut: "g u" },
   { id: "id-generator", name: "Random ID", description: "Generate prefixed, numeric or timestamp-based IDs.", category: "Generators", keywords: ["id", "random", "generate", "order", "prefix", "alphanumeric", "timestamp", "nanoid"], icon: Shuffle },
   { id: "mock-data", name: "Mock Data Generator", description: "Fake names, emails, dates and IDs as JSON.", category: "Generators", keywords: ["mock", "fake", "data", "seed", "fixtures", "names", "emails", "json", "faker", "test data"], icon: Sparkles },
+  { id: "lorem-ipsum", name: "Lorem Ipsum", description: "Placeholder words, sentences, paragraphs and image boxes.", category: "Generators", keywords: ["lorem", "ipsum", "placeholder", "dummy text", "filler", "paragraphs", "words", "sentences", "placeholder image", "mock"], icon: TextQuote },
   // ---- Utilities
   { id: "permissions", name: "Unix Permissions", description: "Convert between chmod numbers and rwx notation.", category: "Utilities", keywords: ["chmod", "permissions", "unix", "linux", "755", "rwx", "octal", "file mode"], icon: Lock },
   { id: "file-size", name: "File Size", description: "Convert bytes, KB, MB, GB and TB in decimal or binary.", category: "Utilities", keywords: ["bytes", "kb", "mb", "gb", "tb", "size", "storage", "binary", "kib", "mib"], icon: HardDrive },
@@ -127,6 +184,8 @@ const definitions: ToolDefinition[] = [
   { id: "bitwise", name: "Bitwise Calculator", description: "AND, OR, XOR, NOT and shifts in binary, decimal and hex.", category: "Utilities", keywords: ["bitwise", "and", "or", "xor", "not", "shift", "binary", "bits", "flags", "mask"], icon: Cpu },
   { id: "stack-trace", name: "Stack Trace Cleaner", description: "Highlight app frames and collapse framework noise.", category: "Utilities", keywords: ["stack trace", "error", "exception", "crash", "javascript", "node", "react native", "android", "java", "swift", "debug"], icon: Bug },
   { id: "logs", name: "Log Pretty Printer", description: "Color levels, filter, search and expand JSON logs.", category: "Utilities", keywords: ["logs", "log", "pretty", "json logs", "error", "warn", "info", "debug", "filter", "search", "timestamps"], icon: ScrollText },
+  { id: "unit-converter", name: "Unit Converter", description: "Length, mass, temperature, data, time, area, volume and speed.", category: "Utilities", keywords: ["unit", "convert", "converter", "length", "mass", "weight", "temperature", "celsius", "fahrenheit", "km", "miles", "bytes", "speed", "area", "volume"], icon: Scale },
+  { id: "scratchpad", name: "Scratchpad", description: "Notes and code snippets that stay in this browser, and only if you opt in.", category: "Utilities", keywords: ["scratchpad", "notes", "snippets", "clipboard", "save", "todo", "paste", "local", "draft", "memo"], icon: NotebookPen },
 ];
 
 export const tools: ToolWithRoute[] = definitions.map((t) => ({

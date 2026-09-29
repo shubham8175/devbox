@@ -4,9 +4,11 @@ import { useSyncExternalStore } from "react";
 
 /**
  * Tiny localStorage-backed store for UI preferences (favorites, recent tools,
- * sidebar state). Only tool ids and booleans ever go through here, never user content.
+ * sidebar state). Only tool ids and booleans go through the stores in this
+ * file. The one exception is the Scratchpad (see scratchpad-store.ts), which
+ * reuses this helper and only writes after the user explicitly opts in.
  */
-function createStore<T>(key: string, fallback: T, validate: (v: unknown) => v is T) {
+export function createStore<T>(key: string, fallback: T, validate: (v: unknown) => v is T) {
   let cached: T = fallback;
   let cachedRaw: string | null | undefined;
   const listeners = new Set<() => void>();
@@ -46,6 +48,18 @@ function createStore<T>(key: string, fallback: T, validate: (v: unknown) => v is
     listeners.forEach((l) => l());
   };
 
+  /** Delete the key entirely (used when a user withdraws opt-in persistence). */
+  const remove = () => {
+    cached = fallback;
+    cachedRaw = null;
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // storage unavailable; nothing to delete
+    }
+    listeners.forEach((l) => l());
+  };
+
   const subscribe = (listener: () => void) => {
     listeners.add(listener);
     const onStorage = (e: StorageEvent) => {
@@ -59,7 +73,7 @@ function createStore<T>(key: string, fallback: T, validate: (v: unknown) => v is
   };
 
   const getServer = () => fallback;
-  return { get, set, subscribe, getServer };
+  return { get, set, remove, subscribe, getServer };
 }
 
 const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string");

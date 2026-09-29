@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, PanelLeftClose, PanelLeftOpen, Search, Star, X } from "lucide-react";
-import { categories, getTool, tools, toolsByCategory } from "@/data/tools";
+import { ChevronRight, LayoutGrid, PanelLeftClose, PanelLeftOpen, Search, Star, X } from "lucide-react";
+import { categories, categoryIcons, getTool, tools, toolsByCategory } from "@/data/tools";
 import { useCommandPalette } from "@/components/layout/command-palette-context";
 import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -20,6 +20,8 @@ interface SidebarProps {
   onMobileClose: () => void;
 }
 
+const sectionLabel = "flex items-center gap-1 px-2 pb-1 pt-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle";
+
 function NavItem({ tool, compact, active, onClick }: { tool: ToolWithRoute; compact: boolean; active: boolean; onClick: () => void }) {
   const Icon = tool.icon;
   return (
@@ -29,7 +31,7 @@ function NavItem({ tool, compact, active, onClick }: { tool: ToolWithRoute; comp
       aria-current={active ? "page" : undefined}
       title={compact ? tool.name : undefined}
       className={cn(
-        "group flex h-8 items-center gap-2.5 rounded-lg text-sm transition-colors",
+        "group flex h-8 items-center gap-2.5 rounded-lg text-[13px] transition-colors",
         compact ? "justify-center px-0" : "px-2.5",
         active ? "bg-accent-soft font-medium text-fg" : "text-fg-muted hover:bg-surface-hover hover:text-fg",
       )}
@@ -54,23 +56,25 @@ function CategorySection({
   onMobileClose: () => void;
 }) {
   const items = toolsByCategory(category);
+  const Icon = categoryIcons[category];
   return (
-    <div className="mb-1">
+    <div>
       <button
         type="button"
         onClick={() => toggleCategoryOpen(category, !open)}
         aria-expanded={open}
         className={cn(
-          "flex h-7 w-full items-center gap-1.5 rounded-md px-2 text-[11px] font-medium uppercase tracking-wider transition-colors cursor-pointer",
-          activeCategory ? "text-fg" : "text-fg-subtle hover:text-fg-muted",
+          "group flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-medium transition-colors cursor-pointer hover:bg-surface-hover hover:text-fg",
+          activeCategory ? "text-fg" : "text-fg-muted",
         )}
       >
-        <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform duration-150", open && "rotate-90")} />
+        <Icon className={cn("h-4 w-4 shrink-0 transition-colors", activeCategory ? "text-accent-strong" : "text-fg-subtle group-hover:text-fg-muted")} />
         <span className="truncate">{category}</span>
-        <span className="ml-auto font-mono text-[10px] normal-case tracking-normal text-fg-subtle">{items.length}</span>
+        <span className="ml-auto font-mono text-[10px] text-fg-subtle">{items.length}</span>
+        <ChevronRight className={cn("h-3.5 w-3.5 shrink-0 text-fg-subtle transition-transform duration-150", open && "rotate-90")} />
       </button>
       {open ? (
-        <ul className="mb-2 mt-0.5 space-y-0.5 pl-1">
+        <ul className="my-1 ml-[18px] space-y-0.5 border-l pl-2">
           {items.map((tool) => (
             <li key={tool.id}>
               <NavItem tool={tool} compact={false} active={pathname === tool.href} onClick={onMobileClose} />
@@ -82,9 +86,109 @@ function CategorySection({
   );
 }
 
+/**
+ * Collapsed rail: one icon per category. Hovering or focusing an icon opens a
+ * flyout with that category's tools, so the rail is navigable without expanding.
+ */
+function RailCategory({
+  category,
+  active,
+  pathname,
+  open,
+  onOpen,
+  onClose,
+  onNavigate,
+}: {
+  category: ToolCategory;
+  active: boolean;
+  pathname: string;
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onNavigate: () => void;
+}) {
+  const Icon = categoryIcons[category];
+  const items = toolsByCategory(category);
+  const ref = useRef<HTMLLIElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Anchor the fixed panel to the rail item and keep it inside the viewport,
+  // re-running whenever the rail scrolls or the window resizes.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const anchor = ref.current;
+      const panel = panelRef.current;
+      if (!anchor || !panel) return;
+      const rect = anchor.getBoundingClientRect();
+      const aside = anchor.closest("aside")?.getBoundingClientRect();
+      const maxTop = Math.max(8, window.innerHeight - panel.offsetHeight - 8);
+      panel.style.left = `${aside?.right ?? rect.right}px`;
+      panel.style.top = `${Math.min(rect.top, maxTop)}px`;
+    };
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [open]);
+
+  return (
+    <li
+      ref={ref}
+      onMouseEnter={onOpen}
+      onMouseLeave={onClose}
+      onFocus={onOpen}
+      onBlur={(e) => {
+        if (!ref.current?.contains(e.relatedTarget as Node | null)) onClose();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+    >
+      <Link
+        href={`/?category=${encodeURIComponent(category)}`}
+        onClick={onNavigate}
+        aria-label={category}
+        aria-haspopup="true"
+        aria-expanded={open}
+        className={cn(
+          "flex h-8 items-center justify-center rounded-lg transition-colors",
+          active || open ? "bg-accent-soft text-accent-strong" : "text-fg-subtle hover:bg-surface-hover hover:text-fg",
+        )}
+      >
+        <Icon className="h-4 w-4" />
+      </Link>
+      {open ? (
+        <div ref={panelRef} className="fixed z-50 pl-2">
+          <div className="w-60 rounded-xl border bg-bg-elevated p-1.5 shadow-2xl animate-fade-in">
+            <div className={cn(sectionLabel, "justify-between")}>
+              <span className="flex items-center gap-1.5">
+                <Icon className="h-3 w-3" /> {category}
+              </span>
+              <span className="font-mono normal-case tracking-normal">{items.length}</span>
+            </div>
+            <ul className="max-h-[min(70vh,28rem)] space-y-0.5 overflow-y-auto overscroll-contain">
+              {items.map((tool) => (
+                <li key={tool.id}>
+                  <NavItem tool={tool} compact={false} active={pathname === tool.href} onClick={onNavigate} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
+    </li>
+  );
+}
+
 export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
   const drawerRef = useRef<HTMLElement>(null);
+  const desktopRef = useRef<HTMLElement>(null);
+  const [flyout, setFlyout] = useState<ToolCategory | null>(null);
 
   // Mobile drawer: lock page scroll, move focus in, and restore it on close.
   useEffect(() => {
@@ -130,6 +234,16 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
 
   const currentId = pathname.startsWith("/tools/") ? pathname.slice("/tools/".length) : null;
   const currentCategory = currentId ? (getTool(currentId)?.category ?? null) : null;
+
+  // Keep the current tool visible in a list this long, on load and after palette / shortcut navigation.
+  useEffect(() => {
+    setFlyout(null);
+    for (const root of [desktopRef.current, drawerRef.current]) {
+      root?.querySelector<HTMLElement>('nav [aria-current="page"]')?.scrollIntoView({ block: "nearest" });
+    }
+  }, [pathname, collapsed, mobileOpen]);
+
+  const closeFlyout = () => setFlyout(null);
 
   const nav = (compact: boolean) => (
     <>
@@ -187,19 +301,28 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         </button>
       </div>
 
-      <nav className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4", compact ? "px-2" : "px-3")} aria-label="Tools">
+      <nav
+        className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4", compact ? "px-2" : "px-3")}
+        aria-label="Tools"
+      >
         <Link
           href="/"
           onClick={onMobileClose}
-          title={compact ? "All tools" : undefined}
+          title={compact ? `All tools (${tools.length})` : undefined}
+          aria-current={pathname === "/" ? "page" : undefined}
           className={cn(
-            "mb-2 flex h-8 items-center rounded-lg text-sm transition-colors",
+            "group mb-2 flex h-8 items-center gap-2.5 rounded-lg text-[13px] transition-colors",
             compact ? "justify-center px-0" : "px-2.5",
             pathname === "/" ? "bg-accent-soft font-medium text-fg" : "text-fg-muted hover:bg-surface-hover hover:text-fg",
           )}
         >
-          {compact ? <span className="font-mono text-[11px]">{tools.length}</span> : "All tools"}
-          {compact ? null : <span className="ml-auto font-mono text-[11px] text-fg-subtle">{tools.length}</span>}
+          <LayoutGrid className={cn("h-4 w-4 shrink-0 transition-colors", pathname === "/" ? "text-accent-strong" : "text-fg-subtle group-hover:text-fg-muted")} />
+          {compact ? null : (
+            <>
+              <span>All tools</span>
+              <span className="ml-auto font-mono text-[10px] text-fg-subtle">{tools.length}</span>
+            </>
+          )}
         </Link>
 
         {favoriteTools.length ? (
@@ -207,7 +330,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
             {compact ? (
               <div className="my-2 border-t" />
             ) : (
-              <div className="flex items-center gap-1 px-2 pb-1 pt-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+              <div className={sectionLabel}>
                 <Star className="h-3 w-3" /> Favorites
               </div>
             )}
@@ -219,11 +342,15 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
               ))}
             </ul>
           </div>
-        ) : null}
+        ) : compact ? null : (
+          <p className="mb-3 flex items-center gap-1.5 px-2.5 text-[11px] text-fg-subtle">
+            <Star className="h-3 w-3 shrink-0" /> Star a tool to pin it here
+          </p>
+        )}
 
         {recentTools.length ? (
           <div className="mb-3">
-            {compact ? <div className="my-2 border-t" /> : <div className="px-2 pb-1 pt-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">Recent</div>}
+            {compact ? <div className="my-2 border-t" /> : <div className={sectionLabel}>Recent</div>}
             <ul className="space-y-0.5">
               {recentTools.map((tool) => (
                 <li key={tool.id}>
@@ -239,35 +366,37 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
             <div className="my-2 border-t" />
             <ul className="space-y-0.5">
               {categories.map((category) => (
-                <li key={category}>
-                  <Link
-                    href={`/?category=${encodeURIComponent(category)}`}
-                    onClick={onMobileClose}
-                    title={category}
-                    className={cn(
-                      "flex h-8 items-center justify-center rounded-lg font-mono text-[11px] transition-colors",
-                      currentCategory === category ? "bg-accent-soft text-fg" : "text-fg-subtle hover:bg-surface-hover hover:text-fg",
-                    )}
-                  >
-                    {category.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase()}
-                  </Link>
-                </li>
+                <RailCategory
+                  key={category}
+                  category={category}
+                  active={currentCategory === category}
+                  pathname={pathname}
+                  open={flyout === category}
+                  onOpen={() => setFlyout(category)}
+                  onClose={closeFlyout}
+                  onNavigate={() => {
+                    closeFlyout();
+                    onMobileClose();
+                  }}
+                />
               ))}
             </ul>
           </>
         ) : (
           <>
-            <div className="px-2 pb-1 pt-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">Categories</div>
-            {categories.map((category) => (
-              <CategorySection
-                key={category}
-                category={category}
-                open={openCategories.includes(category) || currentCategory === category}
-                activeCategory={currentCategory === category}
-                pathname={pathname}
-                onMobileClose={onMobileClose}
-              />
-            ))}
+            <div className={sectionLabel}>Categories</div>
+            <div className="space-y-0.5">
+              {categories.map((category) => (
+                <CategorySection
+                  key={category}
+                  category={category}
+                  open={openCategories.includes(category) || currentCategory === category}
+                  activeCategory={currentCategory === category}
+                  pathname={pathname}
+                  onMobileClose={onMobileClose}
+                />
+              ))}
+            </div>
           </>
         )}
       </nav>
@@ -280,6 +409,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
     <>
       {/* Desktop sidebar */}
       <aside
+        ref={desktopRef}
         className={cn(
           "sticky top-0 hidden h-dvh shrink-0 flex-col border-r bg-bg-elevated transition-[width] duration-200 lg:flex",
           collapsed ? "w-16" : "w-64",
