@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { CopyButton } from "@/components/copy-button";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+import { SITE_URL } from "@/lib/site";
 
 export function QrTool() {
   const [mode, setMode] = useState<QrMode>("text");
@@ -129,7 +130,23 @@ export function QrTool() {
     <div className="grid gap-4 lg:grid-cols-5">
       <div className="space-y-4 lg:col-span-3">
         <Card className="surface-gradient shadow-card">
-          <CardHeader title="Content" />
+          <CardHeader
+            title="Content"
+            actions={
+              !payload ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setMode("url");
+                    setUrl(SITE_URL);
+                  }}
+                >
+                  Load sample
+                </Button>
+              ) : null
+            }
+          />
           <div className="mb-4 flex flex-wrap gap-1.5">
             {QR_MODES.map((m) => (
               <button
@@ -149,7 +166,7 @@ export function QrTool() {
           {mode === "text" ? (
             <>
               <Label htmlFor="qr-text">Text</Label>
-              <Textarea id="qr-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Any text" className="min-h-[120px]" />
+              <Textarea id="qr-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Any text" className="min-h-30" />
             </>
           ) : null}
           {mode === "url" ? (
@@ -195,7 +212,7 @@ export function QrTool() {
               </div>
               <div>
                 <Label htmlFor="qr-body">Body</Label>
-                <Textarea id="qr-body" value={email.body} onChange={(e) => setEmail({ ...email, body: e.target.value })} className="min-h-[80px] font-sans" />
+                <Textarea id="qr-body" value={email.body} onChange={(e) => setEmail({ ...email, body: e.target.value })} className="min-h-20 font-sans" />
               </div>
             </div>
           ) : null}
@@ -213,7 +230,7 @@ export function QrTool() {
               </div>
               <div>
                 <Label htmlFor="qr-sms-m">Message</Label>
-                <Textarea id="qr-sms-m" value={sms.message} onChange={(e) => setSms({ ...sms, message: e.target.value })} className="min-h-[80px] font-sans" />
+                <Textarea id="qr-sms-m" value={sms.message} onChange={(e) => setSms({ ...sms, message: e.target.value })} className="min-h-20 font-sans" />
               </div>
             </div>
           ) : null}

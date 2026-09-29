@@ -10,6 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { OutputRow } from "@/components/output-row";
+
+/**
+ * Demo token: HS256 header, a small set of standard and custom claims, expiry in 2100.
+ * The signature is a placeholder; this tool never verifies signatures.
+ */
+const JWT_SAMPLE =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+  "eyJzdWIiOiJ1c2VyXzQyIiwibmFtZSI6IkFkYSBMb3ZlbGFjZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc0MDAwMDAwMCwiZXhwIjo0MTAyNDQ0ODAwfQ." +
+  "sflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 import { CopyButton } from "@/components/copy-button";
 
 const STATUS_TONE = {
@@ -44,11 +53,15 @@ export function JwtTool() {
           title="Token"
           description="Paste a JWT. A leading “Bearer ” prefix is ignored."
           actions={
-            <>
-              <Button size="sm" variant="ghost" onClick={() => setToken("")} disabled={!token}>
+            !token ? (
+              <Button size="sm" variant="ghost" onClick={() => setToken(JWT_SAMPLE)}>
+                Load sample
+              </Button>
+            ) : (
+              <Button size="sm" variant="ghost" onClick={() => setToken("")}>
                 Clear
               </Button>
-            </>
+            )
           }
         />
         <Textarea

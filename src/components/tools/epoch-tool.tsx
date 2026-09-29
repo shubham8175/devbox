@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+
+/** 2023-11-14T22:13:20Z: a round number that is easy to recognise in the output. */
+const EPOCH_SAMPLE = "1700000000";
 import { OutputGrid, OutputRow } from "@/components/output-row";
 import { CopyButton } from "@/components/copy-button";
 
@@ -52,9 +55,15 @@ export function EpochTool() {
           title="Convert"
           description="Paste a Unix timestamp (seconds or milliseconds) or any ISO 8601 / date string."
           actions={
-            <Button size="sm" variant="ghost" onClick={() => setInput("")} disabled={!input}>
-              <Eraser className="h-3.5 w-3.5" /> Clear
-            </Button>
+            !input ? (
+              <Button size="sm" variant="ghost" onClick={() => setInput(EPOCH_SAMPLE)}>
+                Load sample
+              </Button>
+            ) : (
+              <Button size="sm" variant="ghost" onClick={() => setInput("")}>
+                <Eraser className="h-3.5 w-3.5" /> Clear
+              </Button>
+            )
           }
         />
         <Label htmlFor="epoch-input" hint={result.kind in KIND_LABEL ? KIND_LABEL[result.kind] : undefined}>
