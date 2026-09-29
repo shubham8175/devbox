@@ -84,6 +84,9 @@ const nextConfig: NextConfig = {
     if (isDesktopBuild) return [];
     return [
       { source: "/(.*)", headers: securityHeaders },
+      // Browsers cap service worker script caching at 24h, but make every
+      // check hit the origin so a deploy is picked up on the next visit.
+      { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache, must-revalidate" }] },
     ];
   },
 };

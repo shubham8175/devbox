@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, Search } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { useCommandPalette } from "@/components/layout/command-palette-context";
+import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 
 export function MobileHeader({ onMenu }: { onMenu: () => void }) {
   const { open } = useCommandPalette();
@@ -20,6 +21,7 @@ export function MobileHeader({ onMenu }: { onMenu: () => void }) {
       <Link href="/" className="flex min-w-0 items-center gap-2">
         <Logo className="h-6 w-6" />
         <span className="text-sm font-semibold tracking-tight">DevBox</span>
+        <OfflineIndicator />
       </Link>
       <button
         type="button"

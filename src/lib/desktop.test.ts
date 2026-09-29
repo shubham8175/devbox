@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { detectDesktopOs, isDesktopApp } from "@/lib/desktop";
+import { detectDesktopOs, detectMobileOs, isDesktopApp } from "@/lib/desktop";
+import { manualInstallHint } from "@/lib/pwa";
 import { DESKTOP_DOWNLOAD_URLS, DESKTOP_RELEASES_URL } from "@/lib/site";
 
 describe("isDesktopApp", () => {
@@ -41,6 +42,38 @@ describe("detectDesktopOs", () => {
     expect(detectDesktopOs("Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36")).toBe("other");
     expect(detectDesktopOs("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1")).toBe("other");
     expect(detectDesktopOs("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36")).toBe("other");
+  });
+});
+
+describe("detectMobileOs", () => {
+  const iphone = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1";
+  const ipadDesktopMode = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.5 Safari/605.1.15";
+  const android = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36";
+  const mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36";
+  const windows = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36";
+
+  it("recognises iPhone and Android", () => {
+    expect(detectMobileOs(iphone)).toBe("ios");
+    expect(detectMobileOs(android)).toBe("android");
+  });
+  it("treats an iPad in desktop mode as iOS, but not a real Mac", () => {
+    expect(detectMobileOs(ipadDesktopMode, 5)).toBe("ios");
+    expect(detectMobileOs(mac, 0)).toBe(null);
+  });
+  it("is null on desktops", () => {
+    expect(detectMobileOs(windows)).toBe(null);
+    expect(detectMobileOs("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36")).toBe(null);
+  });
+  it("never overlaps with a desktop installer offer", () => {
+    for (const ua of [iphone, android]) {
+      expect(detectDesktopOs(ua)).toBe("other");
+    }
+    expect(detectDesktopOs(ipadDesktopMode, 5)).toBe("other");
+  });
+  it("gives platform-specific install steps", () => {
+    expect(manualInstallHint(iphone)).toContain("Add to Home Screen");
+    expect(manualInstallHint(android)).toContain("Add to Home screen");
+    expect(manualInstallHint(mac)).toContain("Install");
   });
 });
 

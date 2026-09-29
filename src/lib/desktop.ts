@@ -13,6 +13,16 @@ export function isDesktopApp(): boolean {
 }
 
 export type DesktopOs = "macos" | "windows" | "other";
+export type MobileOs = "ios" | "android" | null;
+
+/** Phones and tablets, where the desktop installer is useless and "Add to Home Screen" is the install path. */
+export function detectMobileOs(ua: string, maxTouchPoints = 0): MobileOs {
+  if (/iPhone|iPad|iPod/.test(ua)) return "ios";
+  // iPadOS asks for desktop sites by default and then reports itself as a Mac.
+  if (/Macintosh|Mac OS X/.test(ua) && maxTouchPoints > 1) return "ios";
+  if (/Android/.test(ua)) return "android";
+  return null;
+}
 
 /** Which desktop installer to offer, from the user agent. iPads report "Macintosh" but have touch points. */
 export function detectDesktopOs(ua: string, maxTouchPoints = 0): DesktopOs {

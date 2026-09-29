@@ -9,6 +9,8 @@ import { CommandPalette } from "@/components/command-palette";
 import { CommandPaletteContext } from "@/components/layout/command-palette-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { DesktopBridge } from "@/components/desktop/desktop-bridge";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { UpdateBanner } from "@/components/pwa/update-banner";
 import { tools } from "@/data/tools";
 import { toggleSidebarCollapsed } from "@/lib/store";
 
@@ -91,13 +93,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             <MobileHeader onMenu={() => setMobileNavOpen(true)} />
             <main className="min-w-0 flex-1 px-4 py-5 sm:px-8 sm:py-8 lg:px-10">{children}</main>
             <footer className="flex flex-col items-center gap-1.5 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-center text-[11px] text-fg-subtle sm:px-8">
-              <span>Your data stays in your browser. Nothing is uploaded or stored.</span>
+              <span>Your data stays on your device. Nothing you enter is uploaded or stored.</span>
               <AboutFooter />
             </footer>
           </div>
         </div>
         <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
         <DesktopBridge />
+        <ServiceWorkerRegister />
+        <UpdateBanner />
       </CommandPaletteContext.Provider>
     </ToastProvider>
   );

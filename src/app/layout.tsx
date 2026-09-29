@@ -30,6 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary", title: "DevBox — Browser-Based Developer Tools", description: SITE_DESCRIPTION },
   applicationName: "DevBox",
+  appleWebApp: { capable: true, title: "DevBox", statusBarStyle: "default" },
   formatDetection: { telephone: false, email: false, address: false },
 };
 

@@ -31,7 +31,7 @@ Most online developer tools send your input to a server, wrap it in ads, and mak
 - **Private by design.** Every tool runs in your browser. No accounts, no database, no backend, no analytics. Nothing you paste or upload is stored or sent anywhere. Images and QR codes are processed with the Canvas API on your machine.
 - **One place for everything.** 81 tools across 16 categories behind a single search box. Press `⌘K` and type what you want to do.
 - **Fast.** Every page is statically generated. Heavy libraries such as the SQL formatter load only on the page that needs them.
-- **Works offline as a desktop app.** The same code ships as a 10 MB native app for macOS and Windows through Tauri, with no Electron and no bundled browser.
+- **Installs anywhere, works offline.** Add DevBox to your phone's home screen or your desktop's dock straight from the browser. A service worker caches every tool after the first visit, so the whole toolbox works with no connection. The same code also ships as a 10 MB native app for macOS and Windows through Tauri, with no Electron and no bundled browser.
 - **Try before you paste.** Tools ship with a **Load sample** button, so you can see real output in one click before bringing your own data.
 - **Honest about limits.** Every tool enforces input size limits and reports errors with the exact step that failed, instead of silently truncating or hanging.
 
@@ -91,6 +91,8 @@ Paste a Unix timestamp in seconds or milliseconds, or any ISO 8601 date, and get
 | Platform | Download | Notes |
 | --- | --- | --- |
 | **Web** | [devbox.voyra.co.in](https://devbox.voyra.co.in) | Nothing to install. Works in every modern browser. |
+| **iPhone / iPad** | Open the site in Safari, tap **Share**, then **Add to Home Screen** | Installs as a standalone app with its own icon. Works offline once opened. |
+| **Android** | Open the site in Chrome, tap **Install as app** in the sidebar (or the browser menu) | Same as above. Shared text and links can be sent straight to the QR tool. |
 | **macOS** | [DevBox-macOS.dmg](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-macOS.dmg) | Universal build for Apple Silicon and Intel. macOS 11.3 or later. |
 | **Windows** | [DevBox-Windows-Setup.exe](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-Windows-Setup.exe) | Windows 10 and 11. Installs for the current user, no admin needed. |
 
@@ -169,6 +171,7 @@ Star any tool to pin it to **Favorites**. Recently used tools appear on the home
 
 - **No network calls with your data.** The Content Security Policy is `connect-src 'self'`. The only outbound request any tool can make is the Open Graph preview's optional "Load remote image" button, which asks your browser to fetch a URL you typed.
 - **No storage of input.** Tool input lives in React state and is gone when you close the tab. A Playwright test types a sentinel string into a tool, triggers a download, and asserts it never appears in any request, URL, cookie, `localStorage`, `sessionStorage` or IndexedDB.
+- **The offline cache holds only the app.** The service worker caches same-origin pages and build assets so tools work offline. It never sees a request carrying your input, because no tool makes one.
 - **Strict headers on the web build.** CSP, `X-Frame-Options`, `Referrer-Policy` and `Permissions-Policy` are set in `next.config.ts`. The desktop build applies an equivalent CSP from `src-tauri/tauri.conf.json`.
 - **Minimal desktop surface.** The Tauri shell exposes only `core:default`. No filesystem, shell, HTTP or dialog plugins reach the webview. Downloads are written to your Downloads folder by the Rust side and nothing else.
 - **Few dependencies.** Beyond React and Next: `lucide-react`, `qrcode`, `jsqr`, `yaml`, `sql-formatter` and `semver`. CSV, XML, JSONPath, EXIF, ZIP and diff logic are implemented in `src/lib/tools` and have no third-party code.

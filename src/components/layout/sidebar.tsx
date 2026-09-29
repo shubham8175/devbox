@@ -8,6 +8,8 @@ import { categories, getTool, tools, toolsByCategory } from "@/data/tools";
 import { useCommandPalette } from "@/components/layout/command-palette-context";
 import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { InstallButton } from "@/components/pwa/install-button";
+import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { Kbd } from "@/components/ui/kbd";
 import { toggleCategoryOpen, toggleSidebarCollapsed, useFavorites, useOpenCategories, useRecents, useSidebarCollapsed } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -137,6 +139,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           {compact ? null : <span className="text-sm font-semibold tracking-tight">DevBox</span>}
         </Link>
         <div className={cn("flex items-center gap-1", compact && "flex-col")}>
+          <OfflineIndicator compact={compact} />
           <ThemeToggle />
           <button
             type="button"
@@ -268,6 +271,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           </>
         )}
       </nav>
+
+      <InstallButton compact={compact} />
     </>
   );
 

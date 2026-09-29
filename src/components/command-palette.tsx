@@ -228,7 +228,7 @@ function CommandPalettePanel({ onOpenChange }: Pick<CommandPaletteProps, "onOpen
               <Kbd>h</Kbd> home
             </span>
           </div>
-          <span className="hidden sm:inline">Your data stays in your browser.</span>
+          <span className="hidden sm:inline">Your data stays on your device.</span>
         </div>
       </div>
     </div>
