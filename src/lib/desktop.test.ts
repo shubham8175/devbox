@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { detectDesktopOs, detectMobileOs, isDesktopApp } from "@/lib/desktop";
 import { manualInstallHint } from "@/lib/pwa";
-import { DESKTOP_DOWNLOAD_URLS, DESKTOP_RELEASES_URL } from "@/lib/site";
+import { DESKTOP_DOWNLOAD_URLS, DESKTOP_RELEASES_URL, INSTALL_GUIDE_URL, REPO_URL } from "@/lib/site";
 
 describe("isDesktopApp", () => {
   it("is false outside a browser", () => {
@@ -81,6 +81,12 @@ describe("desktop download URLs", () => {
   it("point straight at fixed-name installers on the latest release", () => {
     expect(DESKTOP_DOWNLOAD_URLS.macos).toBe(`${DESKTOP_RELEASES_URL}/download/DevBox-macOS.dmg`);
     expect(DESKTOP_DOWNLOAD_URLS.windows).toBe(`${DESKTOP_RELEASES_URL}/download/DevBox-Windows-Setup.exe`);
+  });
+  it("point the install guide at the README's Download section", async () => {
+    const { readFileSync } = await import("node:fs");
+    expect(INSTALL_GUIDE_URL).toBe(`${REPO_URL}#download`);
+    expect(DESKTOP_RELEASES_URL.startsWith(REPO_URL)).toBe(true);
+    expect(readFileSync("README.md", "utf8")).toMatch(/^## Download$/m);
   });
   it("use the same asset names the release workflow publishes", async () => {
     const { readFileSync } = await import("node:fs");

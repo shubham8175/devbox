@@ -170,7 +170,7 @@ export default function Page() {
 - `ToastProvider` and `CommandPaletteContext`
 - the global keyboard handler (see section 9)
 - `Sidebar` (desktop, collapsible; mobile, drawer) and `MobileHeader`, each showing the `OfflineIndicator` pill when the connection drops; the sidebar ends with `InstallButton`
-- the `<main>` column and footer with the attribution
+- the `<main>` column and footer with the attribution and the GitHub / LinkedIn links (`AboutFooter`)
 - `CommandPalette`, `DesktopBridge`, `ServiceWorkerRegister` and `UpdateBanner`
 
 ### Installable web app and offline support
@@ -182,7 +182,7 @@ DevBox is a Progressive Web App: phones and desktops can install it from the bro
 - **Warming**: once the page is idle, `ServiceWorkerRegister` posts `WARM_CACHE` and the worker fetches every tool page plus the scripts, stylesheets and fonts they reference (a few MB in total, skipped when the browser reports Save-Data). That is why a tool that was never opened still works offline. `e2e/pwa.spec.ts` proves it by taking the browser offline and opening a never-visited tool.
 - **Updates**: a new deploy installs a new worker that waits. `UpdateBanner` offers "Update"; only then does the page post `SKIP_WAITING` and reload on `controllerchange`. The very first install also fires `controllerchange` (the worker claims open pages) and deliberately does not reload.
 - **Register only where it helps**: `ServiceWorkerRegister` is a no-op in development (it would fight Fast Refresh) and inside the Tauri desktop app (the static export is on disk). `/sw.js` is served with `Cache-Control: no-cache` from `next.config.ts` so a deploy is noticed on the next visit.
-- **Install UI**: `InstallButton` (sidebar) and the homepage pill call the native `beforeinstallprompt` flow when Chromium offers it, and otherwise show a toast with the manual steps for the visitor's platform (`manualInstallHint` in `src/lib/pwa.ts`). Both disappear once the app runs standalone.
+- **Install UI**: `InstallButton` (sidebar) and the homepage pill call the native `beforeinstallprompt` flow when Chromium offers it, and otherwise show a toast with the manual steps for the visitor's platform (`manualInstallHint` in `src/lib/pwa.ts`). The toast carries an "Install guide" link to the README's Download section (`INSTALL_GUIDE_URL` in `src/lib/site.ts`), and the footer links the repository as "Source & install guide". Both install controls disappear once the app runs standalone.
 
 ## 5. The tool registry
 

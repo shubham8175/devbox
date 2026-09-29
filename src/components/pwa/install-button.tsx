@@ -5,6 +5,7 @@ import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { isDesktopApp } from "@/lib/desktop";
 import { manualInstallHint, usePwaInstall } from "@/lib/pwa";
+import { INSTALL_GUIDE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const noopSubscribe = () => () => {};
@@ -23,7 +24,7 @@ export function InstallButton({ compact }: { compact: boolean }) {
 
   const onClick = () => {
     if (state === "prompt") void promptInstall();
-    else toast(manualInstallHint(navigator.userAgent));
+    else toast(manualInstallHint(navigator.userAgent), "info", { label: "Install guide", href: INSTALL_GUIDE_URL });
   };
 
   return (

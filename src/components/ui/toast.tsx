@@ -5,15 +5,23 @@ import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tone = "success" | "error" | "info";
+
+/** A link shown after the message. Toasts with an action stay longer so it can be clicked. */
+export interface ToastAction {
+  label: string;
+  href: string;
+}
+
 interface Toast {
   id: number;
   message: string;
   tone: Tone;
+  action?: ToastAction;
   leaving?: boolean;
 }
 
 interface ToastApi {
-  toast: (message: string, tone?: Tone) => void;
+  toast: (message: string, tone?: Tone, action?: ToastAction) => void;
 }
 
 const ToastContext = createContext<ToastApi>({ toast: () => {} });
@@ -39,10 +47,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toast = useCallback(
-    (message: string, tone: Tone = "success") => {
+    (message: string, tone: Tone = "success", action?: ToastAction) => {
       const id = ++counter.current;
-      setToasts((t) => [...t.slice(-3), { id, message, tone }]);
-      setTimeout(() => dismiss(id), 2200);
+      setToasts((t) => [...t.slice(-3), { id, message, tone, action }]);
+      setTimeout(() => dismiss(id), action ? 8000 : 2200);
     },
     [dismiss],
   );
@@ -69,6 +77,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             >
               <Icon className={cn("h-4 w-4 shrink-0", TONES[t.tone])} />
               <span className="min-w-0 break-words">{t.message}</span>
+              {t.action ? (
+                <a
+                  href={t.action.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-1 shrink-0 whitespace-nowrap font-medium text-accent-strong underline-offset-2 hover:underline"
+                >
+                  {t.action.label}
+                </a>
+              ) : null}
             </div>
           );
         })}

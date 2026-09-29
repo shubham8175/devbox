@@ -1,5 +1,11 @@
 export const SITE_URL = "https://devbox.voyra.co.in";
 
+/** Source code. The README doubles as the user guide. */
+export const REPO_URL = "https://github.com/shubham8175/devbox";
+
+/** README section with the install steps for the web app on phones and the desktop installers. */
+export const INSTALL_GUIDE_URL = `${REPO_URL}#download`;
+
 /** GitHub Releases page for the Tauri desktop app; fallback when the visitor's OS is unknown. */
 export const DESKTOP_RELEASES_URL = "https://github.com/shubham8175/devbox/releases/latest";
 
