@@ -48,6 +48,11 @@ jobs:
       - run: npm ci
       - name: Build installer
         run: npm run desktop:build -- ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+        env:
+          # Ad-hoc sign the whole macOS bundle so Gatekeeper sees a usable
+          # signature (Info.plist bound, correct identifier) instead of the
+          # bare linker signature. Notarization still needs an Apple ID.
+          APPLE_SIGNING_IDENTITY: "-"
       - name: Rename installer to its fixed download name
         shell: bash
         run: |

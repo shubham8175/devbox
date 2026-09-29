@@ -94,9 +94,19 @@ Paste a Unix timestamp in seconds or milliseconds, or any ISO 8601 date, and get
 | **macOS** | [DevBox-macOS.dmg](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-macOS.dmg) | Universal build for Apple Silicon and Intel. macOS 11.3 or later. |
 | **Windows** | [DevBox-Windows-Setup.exe](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-Windows-Setup.exe) | Windows 10 and 11. Installs for the current user, no admin needed. |
 
-The desktop builds are not yet code-signed, so both operating systems warn on first launch.
+The desktop builds are not yet notarized by Apple, so both operating systems warn on first launch.
 
-- **macOS** shows "DevBox Not Opened". Click Done, drag DevBox to Applications, then go to System Settings → Privacy & Security and click **Open Anyway**. Or run `xattr -cr /Applications/DevBox.app` in Terminal.
+- **macOS** shows "DevBox Not Opened" because the app is ad-hoc signed and not notarized. Newer macOS no longer offers "Open" from the right-click menu, and the app cannot be approved while it is still inside the disk image, so the order matters:
+  1. Drag DevBox into the Applications folder and eject the disk image.
+  2. Open DevBox from Applications. When the warning appears, click **Done**.
+  3. Open System Settings → Privacy & Security, scroll down, and click **Open Anyway** next to DevBox. Confirm with your password. The button only appears within about an hour of step 2.
+
+  Or skip the dialogs entirely by running this in Terminal after step 1:
+
+  ```sh
+  xattr -cr /Applications/DevBox.app
+  ```
+
 - **Windows** shows a SmartScreen dialog. Choose **More info** and then **Run anyway**.
 
 ## Tools
