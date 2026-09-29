@@ -94,7 +94,10 @@ Paste a Unix timestamp in seconds or milliseconds, or any ISO 8601 date, and get
 | **macOS** | [DevBox-macOS.dmg](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-macOS.dmg) | Universal build for Apple Silicon and Intel. macOS 11.3 or later. |
 | **Windows** | [DevBox-Windows-Setup.exe](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-Windows-Setup.exe) | Windows 10 and 11. Installs for the current user, no admin needed. |
 
-The desktop builds are not yet code-signed. On macOS, right-click the app and choose **Open** the first time. On Windows, choose **More info** and then **Run anyway** in the SmartScreen dialog.
+The desktop builds are not yet code-signed, so both operating systems warn on first launch.
+
+- **macOS** shows "DevBox Not Opened". Click Done, drag DevBox to Applications, then go to System Settings → Privacy & Security and click **Open Anyway**. Or run `xattr -cr /Applications/DevBox.app` in Terminal.
+- **Windows** shows a SmartScreen dialog. Choose **More info** and then **Run anyway**.
 
 ## Tools
 
