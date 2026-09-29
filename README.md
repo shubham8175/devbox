@@ -4,9 +4,9 @@
 
 # DevBox
 
-**115 developer tools. One search. Nothing leaves your browser.**
+**116 developer tools. One search. Nothing leaves your browser.**
 
-Format JSON, decode a JWT, test a regex, convert cURL to code, compress an image, generate a QR code, and 109 more everyday tasks, all in one fast, local-only app. Available on the web and as a native desktop app for macOS and Windows.
+Format JSON, decode a JWT, test a regex, convert cURL to code, compress an image, generate a QR code, and 110 more everyday tasks, all in one fast, local-only app. Available on the web and as a native desktop app for macOS and Windows.
 
 [**Open the web app**](https://devbox.voyra.co.in) · [**Download for macOS**](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-macOS.dmg) · [**Download for Windows**](https://github.com/shubham8175/devbox/releases/latest/download/DevBox-Windows-Setup.exe) · [Developer docs](DOCS.md)
 
@@ -29,7 +29,7 @@ Format JSON, decode a JWT, test a regex, convert cURL to code, compress an image
 Most online developer tools send your input to a server, wrap it in ads, and make you hunt through a different site for every task. DevBox is the opposite.
 
 - **Private by design.** Every tool runs in your browser. No accounts, no database, no backend, no analytics. Nothing you paste or upload is stored or sent anywhere. Images and QR codes are processed with the Canvas API on your machine.
-- **One place for everything.** 115 tools across 17 categories behind a single search box. Press `⌘K` and type what you want to do, or browse the sidebar, where every category has its own icon and expands in place.
+- **One place for everything.** 116 tools across 17 categories behind a single search box. Press `⌘K` and type what you want to do, or browse the sidebar, where every category has its own icon and expands in place.
 - **Fast.** Every page is statically generated. Heavy libraries such as the SQL formatter load only on the page that needs them.
 - **Installs anywhere, works offline.** Add DevBox to your phone's home screen or your desktop's dock straight from the browser. A service worker caches every tool after the first visit, so the whole toolbox works with no connection. The same code also ships as a 10 MB native app for macOS and Windows through Tauri, with no Electron and no bundled browser.
 - **Try before you paste.** Tools ship with a **Load sample** button, so you can see real output in one click before bringing your own data.
@@ -111,7 +111,7 @@ Six of the tools added in 0.2, chosen because nearly every developer reaches for
     </td>
     <td width="50%" valign="top">
       <b>Schema Visualizer</b><br/>
-      Paste SQL DDL or a Prisma schema and get an entity relationship diagram with keys and relations, plus a Mermaid export.<br/><br/>
+      Paste SQL DDL, a Prisma, Drizzle, TypeORM, Sequelize or Mongoose schema, TypeScript interfaces, or sample MongoDB documents and get an entity relationship diagram with keys and relations, plus a Mermaid export. The source is detected on paste.<br/><br/>
       <img src=".github/assets/schema-visualizer.png" alt="Schema Visualizer drawing users, posts and comments tables with relations" />
     </td>
   </tr>
@@ -128,6 +128,19 @@ Six of the tools added in 0.2, chosen because nearly every developer reaches for
     </td>
   </tr>
 </table>
+
+### Command Cheatsheet
+
+892 terminal commands you actually use, each with a one-line explanation and a copy button. Search by command (`git stash`) or by what you want to do ("undo commit", "kill port", "free disk space"). You can also paste an error message such as `EADDRINUSE`, `ERESOLVE` or "detected dubious ownership" and get the command that fixes it.
+
+<div align="center">
+<img src=".github/assets/commands.png" alt="Command Cheatsheet searching for kill port, listing lsof, npx kill-port, kill and taskkill with destructive and Windows badges" width="900" />
+</div>
+
+- **42 sections across 9 stacks:** Git and the GitHub CLI; shell, macOS, Linux server and Windows PowerShell; Node, npm, pnpm, Yarn and Bun; TypeScript, ESLint and testing; Next.js, React, Vite and Svelte; Python, Django, FastAPI and uv; Go, Rust, Java, .NET and PHP; React Native, Android and iOS; Docker, Kubernetes, databases, AWS, Terraform and deploy.
+- **Common fixes:** 30 commands matched to the error they fix, from npm permission errors and heap out of memory to CocoaPods, Xcode licence and Gradle JDK problems.
+- **Safe to skim:** commands that delete data, discard work or kill processes carry a **destructive** badge. OS-specific commands are labelled macOS, Linux or Windows, and `<placeholders>` are highlighted so you know what to replace.
+- **Filter and share:** narrow by stack or section, expand collapsed sections, press `Esc` to clear the search, and share a search as a link (`/tools/commands?q=kill+port`).
 
 ## Download
 
@@ -179,7 +192,7 @@ Every tool lives at `/tools/<id>`. The full registry is in `src/data/tools.ts`.
 | **CSS** | Color Converter, Unit Converter, Gradient, Box Shadow, Contrast Checker, Tailwind ↔ CSS, Flexbox & Grid Playground, Cubic Bezier, clamp() Calculator |
 | **Networking & Geo** | IP / CIDR, IP ↔ Integer, IP Location, Coordinate Distance, Lat / Lng Formatter |
 | **Generators** | UUID, Random ID, Mock Data, Lorem Ipsum |
-| **Utilities** | Unix Permissions, File Size, GST / VAT, Number Base, Bitwise, Stack Trace Cleaner, Log Pretty Printer, Unit Converter, Scratchpad |
+| **Utilities** | Unix Permissions, File Size, GST / VAT, Number Base, Bitwise, Stack Trace Cleaner, Log Pretty Printer, Unit Converter, Command Cheatsheet, Scratchpad |
 | **MongoDB** | ObjectId, Query Formatter, Aggregation Explainer |
 | **Mobile** | Deep Link Builder, Android Intent URI |
 | **Encoding** | Base64, Escape / Unescape, Hex Viewer, HTML Entities |
@@ -214,7 +227,7 @@ Every tool lives at `/tools/<id>`. The full registry is in `src/data/tools.ts`.
 - **Sidebar.** Every category has an icon and a tool count. Click a category to expand its tools in place; the category of the tool you are on opens automatically and the current tool is scrolled into view.
 - **Collapsed rail.** Press `⌘B` to shrink the sidebar to a column of icons. Hover or focus a category icon to get a flyout listing its tools, so you can jump anywhere without expanding it again.
 - **Favorites and Recent.** Star any tool to pin it to the top of the sidebar and the home page. The last few tools you opened appear under **Recent** in both places.
-- **Command palette.** `⌘K` searches all 115 tools by name, description, keyword or category, with typo tolerance.
+- **Command palette.** `⌘K` searches all 116 tools by name, description, keyword or category, with typo tolerance.
 
 Only tool ids and UI preferences (favorites, recents, theme, sidebar state) are stored in `localStorage`, never your input. The one exception is the Scratchpad, which keeps notes in this browser only after you switch that on.
 

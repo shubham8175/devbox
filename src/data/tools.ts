@@ -7,7 +7,7 @@ import {
   Tag, Share2, Smartphone, ExternalLink, MapPin, Compass, Network, Hash as HashIcon, Calculator, Cpu, Sparkles, ListOrdered, TimerReset, Workflow,
   ClipboardCheck, FileText, CodeXml, TextQuote, FileKey, Sigma, TableProperties, Cable, Boxes, Funnel, Send, BookOpenText, FileType, UserSearch,
   Hexagon, Key, LockKeyhole, Timer, FileBadge, Grid2x2, Ampersand, Wind, LayoutGrid, Contrast, PenTool, Spline, StretchHorizontal, Container,
-  ListChecks, Server, NotebookPen, Scale, FilePen, GitBranch, Wrench, type LucideIcon,
+  ListChecks, Server, NotebookPen, Scale, FilePen, GitBranch, Wrench, SquareTerminal, type LucideIcon,
 } from "lucide-react";
 import type { ToolCategory, ToolDefinition, ToolWithRoute } from "@/types/tool";
 
@@ -67,7 +67,7 @@ const definitions: ToolDefinition[] = [
   { id: "sql", name: "SQL Formatter", description: "Format or minify SQL with syntax highlighting.", category: "Database", keywords: ["sql", "format", "minify", "query", "select", "join", "postgres", "mysql", "beautify"], icon: Table2 },
   { id: "sql-to-orm", name: "SQL → ORM Schema", description: "Turn CREATE TABLE statements into Prisma, Drizzle, TypeORM or Mongoose.", category: "Database", keywords: ["sql", "orm", "prisma", "drizzle", "typeorm", "mongoose", "schema", "create table", "ddl", "model", "convert", "typescript"], icon: TableProperties },
   { id: "connection-string", name: "Connection String", description: "Parse and build Postgres, MySQL, MongoDB and Redis URIs, password masked.", category: "Database", keywords: ["connection string", "database url", "postgres", "postgresql", "mysql", "mongodb", "redis", "amqp", "uri", "dsn", "parse", "build", "password"], icon: Cable },
-  { id: "schema-visualizer", name: "Schema Visualizer", description: "Tables, columns and relations from SQL DDL or a Prisma schema.", category: "Database", keywords: ["schema", "erd", "diagram", "tables", "relations", "foreign key", "prisma", "sql", "ddl", "visualize", "database", "model"], icon: Boxes },
+  { id: "schema-visualizer", name: "Schema Visualizer", description: "ERD from SQL DDL, Prisma, Drizzle, TypeORM, Sequelize, Mongoose, TypeScript types or sample JSON documents.", category: "Database", keywords: ["schema", "erd", "diagram", "tables", "relations", "foreign key", "prisma", "sql", "ddl", "visualize", "database", "model", "drizzle", "typeorm", "sequelize", "mongoose", "mongodb", "collections", "json", "documents", "typescript", "interface", "kysely", "mermaid"], icon: Boxes },
   // ---- API & HTTP
   { id: "curl", name: "cURL Converter", description: "Turn a cURL command into fetch, Axios or Node code.", category: "API & HTTP", keywords: ["curl", "fetch", "axios", "node", "http", "request", "convert", "code"], icon: Terminal, popular: true },
   { id: "api-inspector", name: "API Response Inspector", description: "Analyse the shape, size and quirks of a JSON response.", category: "API & HTTP", keywords: ["api", "response", "json", "inspect", "analyze", "depth", "nulls", "duplicate ids", "tree", "browse"], icon: Microscope },
@@ -185,6 +185,7 @@ const definitions: ToolDefinition[] = [
   { id: "stack-trace", name: "Stack Trace Cleaner", description: "Highlight app frames and collapse framework noise.", category: "Utilities", keywords: ["stack trace", "error", "exception", "crash", "javascript", "node", "react native", "android", "java", "swift", "debug"], icon: Bug },
   { id: "logs", name: "Log Pretty Printer", description: "Color levels, filter, search and expand JSON logs.", category: "Utilities", keywords: ["logs", "log", "pretty", "json logs", "error", "warn", "info", "debug", "filter", "search", "timestamps"], icon: ScrollText },
   { id: "unit-converter", name: "Unit Converter", description: "Length, mass, temperature, data, time, area, volume and speed.", category: "Utilities", keywords: ["unit", "convert", "converter", "length", "mass", "weight", "temperature", "celsius", "fahrenheit", "km", "miles", "bytes", "speed", "area", "volume"], icon: Scale },
+  { id: "commands", name: "Command Cheatsheet", description: "Searchable terminal commands for Git, Node, Python, Docker, mobile and more.", category: "Utilities", keywords: ["commands", "cheatsheet", "cheat sheet", "terminal", "cli", "shell", "bash", "git", "npm", "docker", "kubectl", "adb", "python", "pip"], icon: SquareTerminal },
   { id: "scratchpad", name: "Scratchpad", description: "Notes and code snippets that stay in this browser, and only if you opt in.", category: "Utilities", keywords: ["scratchpad", "notes", "snippets", "clipboard", "save", "todo", "paste", "local", "draft", "memo"], icon: NotebookPen },
 ];
 

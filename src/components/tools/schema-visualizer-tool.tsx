@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Download } from "lucide-react";
 import { useDebounced } from "@/hooks/use-debounced";
-import { DDL_SAMPLE, PRISMA_SAMPLE, parseDdl, parsePrismaSchema } from "@/lib/tools/ddl";
+import { SCHEMA_SOURCES, detectSchemaSource, parseSchemaSource, sourceSpec, type SchemaSource } from "@/lib/tools/schema-sources";
 import { buildSchemaGraph, layoutGraph, schemaStats, toMermaid, type SchemaLayout } from "@/lib/tools/schema-visualizer";
 import { downloadBlob } from "@/lib/tools/canvas";
 import { InputPanel, OutputPanel } from "@/components/ui/panel";
@@ -15,19 +15,25 @@ import { Segmented } from "@/components/ui/segmented";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CopyButton } from "@/components/copy-button";
 
-type Source = "sql" | "prisma";
 type View = "diagram" | "mermaid";
 
 export function SchemaVisualizerTool() {
-  const [source, setSource] = useState<Source>("sql");
+  const [source, setSource] = useState<SchemaSource>("sql");
   const [input, setInput] = useState("");
   const [view, setView] = useState<View>("diagram");
+  const spec = sourceSpec(source);
 
   const debounced = useDebounced(input, 200);
   const parsed = useMemo(() => {
     if (!debounced.trim()) return null;
-    return source === "sql" ? parseDdl(debounced) : parsePrismaSchema(debounced);
+    return parseSchemaSource(source, debounced);
   }, [debounced, source]);
+  // When parsing fails, suggest the source the text looks like.
+  const suggested = useMemo(() => {
+    if (!parsed || parsed.ok) return null;
+    const guess = detectSchemaSource(debounced);
+    return guess && guess !== source ? guess : null;
+  }, [parsed, debounced, source]);
 
   const model = useMemo(() => {
     if (!parsed?.ok) return null;
@@ -48,8 +54,8 @@ export function SchemaVisualizerTool() {
     <div className="grid gap-4 xl:grid-cols-5">
       <InputPanel
         className="xl:col-span-2"
-        title={source === "sql" ? "SQL DDL" : "Prisma schema"}
-        description={source === "sql" ? "CREATE TABLE statements with primary and foreign keys." : "model and enum blocks, including @relation fields."}
+        title={spec.title}
+        description={spec.description}
         actions={
           <>
             <Segmented
@@ -59,13 +65,10 @@ export function SchemaVisualizerTool() {
                 setSource(s);
                 setInput("");
               }}
-              options={[
-                { value: "sql", label: "SQL DDL" },
-                { value: "prisma", label: "Prisma" },
-              ]}
+              options={SCHEMA_SOURCES.map((s) => ({ value: s.id, label: s.label }))}
             />
             {!input ? (
-              <Button size="sm" variant="ghost" onClick={() => setInput(source === "sql" ? DDL_SAMPLE : PRISMA_SAMPLE)}>
+              <Button size="sm" variant="ghost" onClick={() => setInput(spec.sample)}>
                 Load sample
               </Button>
             ) : (
@@ -79,7 +82,13 @@ export function SchemaVisualizerTool() {
         <CodeTextarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={source === "sql" ? "CREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  email VARCHAR(255) NOT NULL UNIQUE\n);" : "model User {\n  id    Int    @id @default(autoincrement())\n  email String @unique\n}"}
+          onPaste={(e) => {
+            // Pasting into an empty box switches to whatever the text looks like.
+            if (input.trim()) return;
+            const guess = detectSchemaSource(e.clipboardData.getData("text"));
+            if (guess && guess !== source) setSource(guess);
+          }}
+          placeholder={spec.placeholder}
           className="min-h-[480px]"
           invalid={parsed ? !parsed.ok : false}
           aria-label="Schema input"
@@ -87,6 +96,15 @@ export function SchemaVisualizerTool() {
         {parsed && !parsed.ok ? (
           <Alert tone="danger" className="mt-2">
             {parsed.error}
+            {suggested ? (
+              <>
+                {" "}
+                This looks like {sourceSpec(suggested).label}.{" "}
+                <button type="button" className="font-medium underline underline-offset-2 hover:text-fg" onClick={() => setSource(suggested)}>
+                  Switch to {sourceSpec(suggested).label}
+                </button>
+              </>
+            ) : null}
           </Alert>
         ) : null}
         {parsed?.ok && parsed.warnings.length ? (

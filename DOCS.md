@@ -25,7 +25,7 @@ This document explains how DevBox is built and how to work on it. For the user-f
 
 ## 1. Overview and principles
 
-DevBox is a personal toolbox of 115 developer utilities served as a single Next.js app. Every tool runs entirely in the browser.
+DevBox is a personal toolbox of 116 developer utilities served as a single Next.js app. Every tool runs entirely in the browser.
 
 The rules that shape every design decision:
 

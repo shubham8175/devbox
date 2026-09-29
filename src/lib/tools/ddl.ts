@@ -372,7 +372,7 @@ function parseStringList(args: string): string[] {
   return out;
 }
 
-interface TypeInfo {
+export interface TypeInfo {
   baseType: BaseType;
   length?: number;
   precision?: number;
@@ -383,7 +383,7 @@ interface TypeInfo {
   serial: boolean;
 }
 
-function normalizeType(raw: string, enums: Map<string, string[]>): TypeInfo {
+export function normalizeType(raw: string, enums: Map<string, string[]>): TypeInfo {
   const lower = raw.toLowerCase();
   const argsMatch = /\(([^()]*)\)/.exec(lower);
   const args = argsMatch ? argsMatch[1] : "";
@@ -441,7 +441,7 @@ function warn(ctx: Ctx, msg: string) {
   if (ctx.warnings.length < DDL_LIMITS.maxWarnings && !ctx.warnings.includes(msg)) ctx.warnings.push(msg);
 }
 
-function newTable(name: string, schema?: string): Table {
+export function newTable(name: string, schema?: string): Table {
   return { name, schema, columns: [], primaryKey: [], uniques: [], foreignKeys: [], indexes: [] };
 }
 
@@ -728,7 +728,7 @@ function parseCreateTable(c: Cursor, ctx: Ctx): boolean {
   return true;
 }
 
-function finalizeTable(table: Table) {
+export function finalizeTable(table: Table) {
   if (!table.primaryKey.length) table.primaryKey = table.columns.filter((col) => col.primaryKey).map((col) => col.name);
   for (const col of table.columns) {
     if (table.primaryKey.some((k) => k.toLowerCase() === col.name.toLowerCase())) {
