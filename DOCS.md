@@ -14,7 +14,7 @@ This document explains how DevBox is built and how to work on it. For the user-f
 8. [Client state and persistence](#8-client-state-and-persistence)
 9. [Keyboard shortcuts and the command palette](#9-keyboard-shortcuts-and-the-command-palette)
 10. [Theming and styling](#10-theming-and-styling)
-11. [PWA, offline support and updates](#11-pwa-offline-support-and-updates)
+11. [Desktop app (Tauri)](#11-desktop-app-tauri)
 12. [Security and privacy model](#12-security-and-privacy-model)
 13. [Input limits and heavy work](#13-input-limits-and-heavy-work)
 14. [Error handling](#14-error-handling)
@@ -45,17 +45,18 @@ npm run dev      # http://localhost:3000
 npm run lint     # eslint (next core-web-vitals + typescript rules)
 npm test         # vitest, runs src/**/*.test.ts once (npm run test:watch to watch)
 npm run test:e2e # playwright: builds, serves the production output and drives Chromium
-npm run build    # runs scripts/build-sw.mjs first, then next build
+npm run build    # next build; every route is static
 npm start        # serve the production build
+npm run desktop:dev   # Tauri window around next dev (needs Rust, see §11)
+npm run desktop:build # desktop installers into src-tauri/target/release/bundle/
 ```
 
 Notes for local development:
 
-- The service worker is only registered in production builds. In `next dev` it is skipped so it never fights Fast Refresh or serves stale responses.
 - The CSP adds `'unsafe-eval'` and WebSocket origins in development only, for React DevTools and hot module reload.
 - `next dev` rewrites `AGENTS.md`. If it shows up as a change, commit it with your work rather than reverting it.
 - Unit tests use Vitest in a plain Node environment (no DOM) and live beside the logic they cover as `src/lib/tools/<name>.test.ts`. `vitest.config.mts` maps the `@/` alias to `src/`. Logic modules are the place for unit tests.
-- Browser tests use Playwright (`e2e/*.spec.ts`, `playwright.config.ts`). They run against `next start` on port 3457 because the service worker and the security headers only exist in production. The config builds first; set `PW_SKIP_BUILD=1` to reuse an existing `.next` while iterating. Chromium is the only configured browser. Use them for behaviour that unit tests cannot see: focus order, live regions, downloads, the mobile layout, storage and network audits, and offline loads.
+- Browser tests use Playwright (`e2e/*.spec.ts`, `playwright.config.ts`). They run against `next start` on port 3457 because the security headers only exist in production. The config builds first; set `PW_SKIP_BUILD=1` to reuse an existing `.next` while iterating. Chromium is the only configured browser. Use them for behaviour that unit tests cannot see: focus order, live regions, downloads, the mobile layout, storage and network audits.
 
 ## 3. Project structure
 
@@ -64,7 +65,8 @@ Notes for local development:
 ├── AGENTS.md / CLAUDE.md      guidance for AI coding agents (auto-maintained by next dev)
 ├── README.md                  user-facing overview
 ├── DOCS.md                    this file
-├── next.config.ts             security headers and service worker cache headers
+├── next.config.ts             security headers; static export when the Tauri CLI builds
+├── src-tauri/                 Tauri desktop shell: Rust window code, config, icons (§11)
 ├── eslint.config.mjs          next core-web-vitals + typescript presets
 ├── postcss.config.mjs         Tailwind v4 via @tailwindcss/postcss
 ├── tsconfig.json              strict TS, "@/*" -> "./src/*"
@@ -73,10 +75,8 @@ Notes for local development:
 ├── e2e/                       Playwright specs
 ├── CASE_STUDY.md              write-up of the Workflows MVP
 ├── public/
-│   ├── icons/                 generated PWA icons (192/512, normal and maskable)
-│   └── sw.js                  GENERATED service worker, do not edit by hand
+│   └── icons/                 generated app icons (192/512, normal and maskable)
 ├── scripts/
-│   ├── build-sw.mjs           writes public/sw.js with a fresh cache version (prebuild)
 │   └── generate-icons.mjs     one-off icon renderer using sharp
 └── src/
     ├── app/                   App Router routes
@@ -85,11 +85,9 @@ Notes for local development:
     │   ├── template.tsx       page-enter animation wrapper
     │   ├── error.tsx          root error boundary
     │   ├── not-found.tsx      404 page
-    │   ├── manifest.ts        web app manifest (icons, shortcuts, share target)
     │   ├── globals.css        theme tokens and global styles
     │   ├── icon.svg           favicon source
     │   ├── apple-icon.png     generated Apple touch icon
-    │   ├── offline/           navigation fallback page for the service worker
     │   └── tools/
     │       ├── error.tsx      per-tool error boundary
     │       ├── loading.tsx    skeleton shown while a tool route loads
@@ -97,7 +95,7 @@ Notes for local development:
     ├── components/
     │   ├── ui/                design-system primitives (Button, Card, Textarea, ...)
     │   ├── layout/            AppShell, Sidebar, MobileHeader, ThemeToggle, footer
-    │   ├── pwa/               service worker registration, update banner, install button
+    │   ├── desktop/           download pill and Tauri event bridge (desktop app only)
     │   ├── home/              home page search and category grid
     │   ├── tools/             one client component per tool (<id>-tool.tsx)
     │   ├── command-palette.tsx
@@ -116,7 +114,7 @@ Notes for local development:
     ├── hooks/                 useCopy, useNow, useHydrated, useDebounced, useRegexWorker
     ├── lib/
     │   ├── store.ts           localStorage-backed preference stores
-    │   ├── pwa.ts             live PWA state (online, update waiting, install prompt)
+    │   ├── desktop.ts         Tauri detection and desktop OS detection
     │   ├── limits.ts          shared input caps
     │   ├── tool-metadata.ts   builds Next Metadata from the registry
     │   ├── utils.ts           cn() class joiner
@@ -156,7 +154,7 @@ export default function Page() {
 | Logic | `src/lib/tools/*.ts` | Pure functions. Parse, convert, format, validate. Return result objects (`{ ok, ... }`) rather than throwing where practical. No React, no DOM except the canvas helpers. |
 | Tool UI | `src/components/tools/*-tool.tsx` | `"use client"` components. Hold input state, call logic with `useMemo`, render results using the shared primitives. |
 | Page | `src/app/tools/<id>/page.tsx` | Exports metadata and composes `ToolPage` + tool UI. |
-| Shell | `src/components/layout/*` | Sidebar, mobile header, footer, palette, toasts, PWA widgets. Wraps every route via the root layout. |
+| Shell | `src/components/layout/*` | Sidebar, mobile header, footer, palette, toasts, desktop bridge. Wraps every route via the root layout. |
 | Registry | `src/data/tools.ts` | Declares every tool and powers navigation, search and metadata. |
 
 ### Application shell
@@ -166,7 +164,7 @@ export default function Page() {
 - `ToastProvider` and `CommandPaletteContext`
 - the global keyboard handler (see section 9)
 - `Sidebar` (desktop, collapsible; mobile, drawer) and `MobileHeader`
-- the `<main>` column and footer with the offline indicator and attribution
+- the `<main>` column and footer with the attribution
 - `CommandPalette`, `ServiceWorkerRegister` and `UpdateBanner`
 
 ## 5. The tool registry
@@ -198,8 +196,6 @@ A definition looks like this:
 ```
 
 Search scoring per query term, highest first: exact name, name prefix, name word prefix, exact keyword, name substring, keyword word prefix, keyword substring, category substring, description substring. A term of three or more characters that matches nothing falls back to a bounded Levenshtein check against name words (and keyword words for terms of four or more), allowing one typo, or two for terms of seven or more. Multi-word queries must match all but one term. Popular tools get a small boost, ties break on shorter then alphabetical names, and an empty query returns all tools in registry order.
-
-The registry is also used by `src/app/manifest.ts` indirectly: the manifest's `shortcuts` list hard-codes five tool URLs, so update it if you rename one of those ids.
 
 ## 6. Adding a new tool
 
@@ -288,7 +284,7 @@ import("sql-formatter").then((mod) => { /* use mod.format */ });
 
 Only tool ids, booleans and the theme string ever go through storage. Never store tool input or output.
 
-`src/lib/pwa.ts` uses the same subscription pattern for live, non-persisted browser state: online status, whether a new service worker is waiting, and whether the install prompt is available.
+`src/components/desktop/hero-app-pill.tsx` uses the same hook with a `null` server snapshot for values that only exist in the browser (whether the page runs inside the desktop app, and the visitor's OS), so the static HTML and the first client render match.
 
 ## 9. Keyboard shortcuts and the command palette
 
@@ -317,26 +313,26 @@ Fonts are Geist Sans and Geist Mono via `next/font/google`, exposed as `--font-s
 
 Helper classes defined in `globals.css` include `skeleton` for loading placeholders, `shadow-card`, `mark-match` and `mark-match-alt` for regex and diff highlighting, and the `animate-*` classes used by the palette, toasts and page transitions.
 
-## 11. PWA, offline support and updates
+## 11. Desktop app (Tauri)
 
-DevBox is installable and works offline for pages the user has already visited.
+The same frontend ships as a native macOS and Windows app through [Tauri v2](https://v2.tauri.app). Nothing moves into the shell: there is no backend to proxy, so the desktop app is the static export of the web app inside a system webview.
 
-- **Manifest** (`src/app/manifest.ts`): standalone display, dark theme colour, four icons (normal and maskable at 192 and 512), five app shortcuts, and a GET-only share target that opens the QR Generator with shared `text` or `url` prefilled. The QR tool reads those query parameters on the client; nothing is posted anywhere.
-- **Icons** are produced by `node scripts/generate-icons.mjs`, which renders the SVG glyph with `sharp` (a transitive dependency of Next). Run it manually when the icon design changes and commit the PNGs. Keep the SVG in the script in sync with `src/app/icon.svg`.
-- **Service worker** (`public/sw.js`) is generated by `scripts/build-sw.mjs`, which runs as the npm `prebuild` step and stamps a version from the Vercel commit SHA, the local git short SHA, or a timestamp. The worker body lives inside that script; edit it there, never in `public/sw.js`.
+```text
+Next.js app (unchanged)  →  static export in out/  →  Tauri window (src-tauri/)
+```
 
-Worker behaviour:
-
-- On install it precaches `/`, `/offline` and the manifest.
-- On activate it deletes every `devbox-*` cache from previous versions and claims clients.
-- Navigations are network-first, cached on success, and fall back to the cached page or `/offline`.
-- Static assets under `/_next/static/`, `/icons/` and common image and font extensions are cache-first.
-- Only same-origin GET requests are handled. Nothing user-entered ever reaches the cache because no tool makes a request carrying input.
-- It never calls `skipWaiting` on its own. `ServiceWorkerRegister` detects a waiting worker and `UpdateBanner` offers Update or Later. Update posts `SKIP_WAITING`; the resulting `controllerchange` event reloads the page once.
-- `ServiceWorkerRegister` checks for updates whenever the tab becomes visible.
-- `next.config.ts` serves `/sw.js` with `Cache-Control: no-cache` so a new deploy is always discovered.
-
-`InstallButton` appears in the sidebar footer only after the browser fires `beforeinstallprompt` and hides once installed. `OfflineIndicator` shows a small pill in the footer when the browser reports offline.
+- **Scripts**: `npm run desktop:dev` starts `next dev` and opens it in a native window; `npm run desktop:build` runs `next build` in export mode and produces the installers. The plain `npm run dev` / `npm run build` web workflow is untouched.
+- **Static export is conditional.** The Tauri CLI sets `TAURI_ENV_PLATFORM` for its hook commands; `next.config.ts` switches to `output: "export"` only then. The web build keeps its security headers (which a static export cannot emit); the desktop build gets an equivalent CSP from `src-tauri/tauri.conf.json` (`connect-src` additionally allows Tauri's `ipc:` origin). `robots.ts` and `sitemap.ts` declare `dynamic = "force-static"`, which export mode requires and which changes nothing for the web build. `out/` and `src-tauri/` are excluded from `tsconfig.json` and ESLint.
+- **Routing**: Tauri's asset resolver falls back from `/tools/json` to `tools/json.html`, so no `trailingSlash` change is needed and client-side navigation works as on the web.
+- **Prerequisites**: Rust (`rustup`, stable) and, on macOS, the Xcode command line tools; on Windows, the Visual Studio C++ build tools and WebView2 (preinstalled on Windows 10/11). Installers are built on the OS they target — there is no cross-compiling.
+- **Config** (`src-tauri/tauri.conf.json`): product name DevBox, identifier `in.co.voyra.devbox`, version read from `package.json`, a 1280×840 resizable window with a 720×520 minimum, `bundle.targets: "all"` (→ `.app` + `.dmg` on macOS, `.msi` + NSIS `.exe` on Windows), macOS minimum 11.3 (needed for webview downloads). Icons in `src-tauri/icons/` are generated from `src/app/icon.svg` with `npx tauri icon`; the web icons are untouched.
+- **Capabilities** (`src-tauri/capabilities/default.json`): only `core:default`. No filesystem, shell, HTTP or dialog plugins are exposed to the webview.
+- **The Rust shell** (`src-tauri/src/lib.rs`) builds the main window itself (the config entry has `create: false`) so it can attach three handlers a bare webview lacks:
+  - `on_download`: tools save files through `<a download>` blob links, which WKWebView cancels without a handler and WebView2 completes silently. The handler writes the file to the user's Downloads folder (de-duplicating names) and emits `devbox://download-finished`; `DesktopBridge` turns that into the usual toast.
+  - `on_new_window` / `on_navigation`: `target="_blank"` links and any navigation off the app's origin (including custom-scheme deep links) open in the system browser or handler instead of inside the window, which is locked to the app's own pages.
+- **Frontend guards**: `src/lib/desktop.ts` (`isDesktopApp()`, checks `__TAURI_INTERNALS__`) is the single switch. Inside the desktop app the homepage pill reads "Running as an app" instead of linking to the installers, and `DesktopBridge` lazily imports `@tauri-apps/api/event`. On the web none of that code runs.
+- **Download pill** (`src/components/desktop/hero-app-pill.tsx`): on the web it links to `DESKTOP_RELEASES_URL` (`src/lib/site.ts`, the GitHub Releases page), labelled "Download for macOS" / "Download for Windows" from the user agent after hydration. `.github/workflows/desktop-release.yml` builds the installers on every `v*` tag (or manually) with `tauri-action` and attaches them to a draft release; publish the draft to make the link resolve.
+- **Output**: `src-tauri/target/release/bundle/macos/DevBox.app` and `bundle/dmg/DevBox_<version>_<arch>.dmg`; on Windows `bundle/msi/*.msi` and `bundle/nsis/*-setup.exe`. Unsigned by default — see the Tauri signing guides for `bundle.macOS.signingIdentity` / notarization and `bundle.windows.certificateThumbprint`, and `plugins.updater` if auto-updates are wanted later.
 
 ## 12. Security and privacy model
 
@@ -383,15 +379,17 @@ Within tools, prefer returning typed error results from logic functions and rend
 
 | Command | What happens |
 | --- | --- |
-| `npm run dev` | Starts Next.js in development. No service worker. Relaxed CSP for HMR. |
-| `npm run build` | npm runs `prebuild` (`scripts/build-sw.mjs`) automatically, then `next build`. Every route is statically generated. |
+| `npm run dev` | Starts Next.js in development. Relaxed CSP for HMR. |
+| `npm run build` | `next build`. Every route is statically generated. With `TAURI_ENV_PLATFORM` set (the desktop scripts do this) it becomes a static export into `out/`. |
+| `npm run desktop:dev` | Opens `next dev` inside a native Tauri window. Needs Rust (§11). |
+| `npm run desktop:build` | Static export plus native installers in `src-tauri/target/release/bundle/`. |
 | `npm start` | Serves the production output with the headers from `next.config.ts`. |
 | `npm run lint` | ESLint with the Next core-web-vitals and TypeScript presets. |
 | `npm test` | Vitest, single run of `src/**/*.test.ts`. `npm run test:watch` keeps it watching. |
 | `npm run test:e2e` | Playwright. Runs `npm run build`, starts `next start -p 3457`, drives Chromium through `e2e/*.spec.ts`. |
-| `node scripts/generate-icons.mjs` | Regenerates PWA icons and the Apple touch icon. Manual, commit the output. |
+| `node scripts/generate-icons.mjs` | Regenerates the web app icons and the Apple touch icon. Manual, commit the output. |
 
-The app is designed for Vercel: static output served from the CDN, `headers()` applied at the edge, and the service worker version taken from `VERCEL_GIT_COMMIT_SHA` when present. Any static host that can set response headers will also work; without the headers the app still functions but loses the CSP and the no-cache rule for `sw.js`.
+The app is designed for Vercel: static output served from the CDN with `headers()` applied at the edge. Any static host that can set response headers will also work; without the headers the app still functions but loses the CSP.
 
 The `.gitignore` excludes build output, `.env*` files, `tsconfig.tsbuildinfo` and `next-env.d.ts`.
 
@@ -413,6 +411,5 @@ Before opening a pull request:
 - [ ] No new network calls, storage keys holding user data, or CSP origins.
 - [ ] Inputs are bounded and hostile input cannot hang the tab.
 - [ ] `npm test`, `npm run lint` and `npm run build` pass. New logic in `src/lib/tools/` has a colocated `*.test.ts`.
-- [ ] `npm run test:e2e` passes when the change touches a tool's UI, keyboard behaviour, downloads or the PWA.
-- [ ] `public/sw.js` was not hand-edited. Worker changes go in `scripts/build-sw.mjs`.
+- [ ] `npm run test:e2e` passes when the change touches a tool's UI, keyboard behaviour, downloads or the desktop app.
 - [ ] If the icon changed, icons were regenerated and committed.

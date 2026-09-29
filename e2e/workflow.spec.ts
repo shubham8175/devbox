@@ -229,26 +229,3 @@ test.describe("mobile layout", () => {
     await expect(w.copyCsv).toBeVisible();
   });
 });
-
-test.describe("offline", () => {
-  test("serves a previously visited workflow page from the service worker cache", async ({ page, context }) => {
-    await page.goto(ROUTE);
-    // Production registers /sw.js; wait until it controls the page (the app reloads once on claim).
-    await page.waitForFunction(() => navigator.serviceWorker?.controller !== null, null, { timeout: 30_000 });
-    // A controlled load caches the page and its static chunks.
-    await page.reload({ waitUntil: "networkidle" });
-    await page.waitForTimeout(500);
-
-    await context.setOffline(true);
-    try {
-      await page.goto(ROUTE);
-      await expect(page.getByRole("heading", { level: 1, name: "Workflow: JSON → CSV" })).toBeVisible();
-      await expect(page.getByText("Offline", { exact: true })).toBeVisible();
-      const w = ui(page);
-      await w.loadSample.click();
-      expect((await w.csv.inputValue()).split("\n")[0]).toBe(SAMPLE_HEADER);
-    } finally {
-      await context.setOffline(false);
-    }
-  });
-});

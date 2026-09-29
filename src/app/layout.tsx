@@ -17,30 +17,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "DevBox — Free Online Developer Tools",
+    default: "DevBox — Browser-Based Developer Tools",
     template: "%s · DevBox",
   },
   description: SITE_DESCRIPTION,
   openGraph: {
     type: "website",
     siteName: "DevBox",
-    title: "DevBox — Free Online Developer Tools",
+    title: "DevBox — Browser-Based Developer Tools",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
   },
-  twitter: { card: "summary", title: "DevBox — Free Online Developer Tools", description: SITE_DESCRIPTION },
+  twitter: { card: "summary", title: "DevBox — Browser-Based Developer Tools", description: SITE_DESCRIPTION },
   applicationName: "DevBox",
   formatDetection: { telephone: false, email: false, address: false },
-  appleWebApp: {
-    capable: true,
-    title: "DevBox",
-    statusBarStyle: "black-translucent",
-  },
-  other: {
-    // Next 16 only emits the unprefixed mobile-web-app-capable tag for
-    // appleWebApp.capable; older iOS/iPadOS Safari still needs this one too.
-    "apple-mobile-web-app-capable": "yes",
-  },
 };
 
 export const viewport: Viewport = {
@@ -66,7 +56,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col bg-bg text-fg">
+      {/* suppressHydrationWarning: browser extensions (Grammarly, ColorZilla…) add
+          attributes to <body> before React hydrates; without this, dev shows a
+          hydration mismatch for every visitor who has one installed. */}
+      <body className="min-h-full flex flex-col bg-bg text-fg" suppressHydrationWarning>
         <AppShell>{children}</AppShell>
       </body>
     </html>

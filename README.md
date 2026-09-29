@@ -62,7 +62,7 @@ e2e/              Playwright browser tests for the workflow page
 
 ## Developer docs
 
-Architecture, the tool registry, how to add a tool, PWA and security details are in [DOCS.md](DOCS.md).
+Architecture, the tool registry, how to add a tool, the desktop app and security details are in [DOCS.md](DOCS.md).
 
 ## Scripts
 

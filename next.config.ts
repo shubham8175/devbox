@@ -3,6 +3,16 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV === "development";
 
 /**
+ * Set by the Tauri CLI for its beforeDevCommand/beforeBuildCommand hooks
+ * (`npm run desktop:dev` / `npm run desktop:build`). The desktop shell can
+ * only serve static files, so those builds use `output: "export"` into
+ * `out/`. Plain `next build` / `next dev` (the Vercel deployment) are
+ * unaffected and keep the security headers below, which a static export
+ * cannot emit — the desktop build gets its CSP from src-tauri/tauri.conf.json.
+ */
+const isDesktopBuild = Boolean(process.env.TAURI_ENV_PLATFORM);
+
+/**
  * DevBox is frontend-only: no API routes, no server actions, no data fetching.
  * Every route pre-renders to static HTML at build time and Vercel serves it
  * from its CDN, so `headers()` below is the only server-side behaviour.
@@ -33,7 +43,6 @@ const csp = [
   "form-action 'self'",
   "frame-ancestors 'none'",
   "frame-src 'none'",
-  "manifest-src 'self'",
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
@@ -70,19 +79,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  ...(isDesktopBuild ? { output: "export", images: { unoptimized: true } } : {}),
   async headers() {
+    if (isDesktopBuild) return [];
     return [
       { source: "/(.*)", headers: securityHeaders },
-      {
-        // Never let a CDN or browser cache the worker script itself, so an
-        // update is always discovered on the next check instead of being
-        // served stale from cache.
-        source: "/sw.js",
-        headers: [
-          { key: "Cache-Control", value: "no-cache" },
-          { key: "Service-Worker-Allowed", value: "/" },
-        ],
-      },
     ];
   },
 };

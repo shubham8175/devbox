@@ -1,0 +1,49 @@
+# Builds the Tauri desktop installers and attaches them to a GitHub Release.
+# Trigger: push a tag like v0.2.0 (after bumping "version" in package.json,
+# which tauri.conf.json reads), or run it manually from the Actions tab.
+# The homepage "Download for macOS / Windows" pill links to the latest release.
+name: Desktop release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            args: --target aarch64-apple-darwin
+          - os: macos-latest
+            args: --target x86_64-apple-darwin
+          - os: windows-latest
+            args: ""
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}-manual-{1}', github.run_number, github.sha) }}
+          releaseName: DevBox ${{ github.ref_type == 'tag' && github.ref_name || 'manual build' }}
+          releaseBody: Desktop installers for macOS (.dmg) and Windows (.msi / .exe setup).
+          releaseDraft: true
+          args: ${{ matrix.args }}

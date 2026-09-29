@@ -39,12 +39,12 @@ export function ToolSearch() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search tools…"
+            placeholder="Search tasks: JSON, JWT, regex, CSV…"
             aria-label="Search tools"
             spellCheck={false}
             autoComplete="off"
             className={cn(
-              "shadow-card h-12 w-full rounded-xl border bg-surface pl-10 pr-20 text-sm text-fg placeholder:text-fg-subtle",
+              "shadow-card h-12 w-full rounded-xl border bg-surface pl-10 pr-4 text-sm sm:pr-20 text-fg placeholder:text-fg-subtle",
               "transition-[border-color,box-shadow] hover:border-border-strong",
               "focus:border-accent/40 focus:outline-none focus:ring-3 focus:ring-accent/10",
             )}
@@ -101,21 +101,9 @@ export function ToolSearch() {
               </Grid>
             </section>
           ) : null}
-          <section>
-            <SectionTitle icon={Star}>Favorites</SectionTitle>
-            {favoriteTools.length ? (
-              <Grid>
-                {favoriteTools.map((t) => (
-                  <ToolCard key={t.id} tool={t} />
-                ))}
-              </Grid>
-            ) : (
-              <p className="flex items-center gap-2 rounded-lg border border-dashed px-3 py-2.5 text-xs text-fg-subtle">
-                <Star className="h-3.5 w-3.5 shrink-0" />
-                No favorites yet. Star a tool to pin it here and in the sidebar.
-              </p>
-            )}
-          </section>
+          {/* Popular tools come first until the user has starred something, so the
+              first screen offers a concrete next step instead of an empty state. */}
+          {favoriteTools.length ? <FavoritesSection tools={favoriteTools} /> : null}
           <section>
             <SectionTitle icon={TrendingUp}>Popular</SectionTitle>
             <Grid>
@@ -124,6 +112,7 @@ export function ToolSearch() {
               ))}
             </Grid>
           </section>
+          {favoriteTools.length ? null : <FavoritesSection tools={favoriteTools} />}
           {categories.map((c) => (
             <section key={c} id={`category-${c.replace(/[^a-z]+/gi, "-").toLowerCase()}`}>
               <SectionTitle>{c}</SectionTitle>
@@ -137,6 +126,26 @@ export function ToolSearch() {
         </>
       )}
     </div>
+  );
+}
+
+function FavoritesSection({ tools }: { tools: ToolWithRoute[] }) {
+  return (
+    <section>
+      <SectionTitle icon={Star}>Favorites</SectionTitle>
+      {tools.length ? (
+        <Grid>
+          {tools.map((t) => (
+            <ToolCard key={t.id} tool={t} />
+          ))}
+        </Grid>
+      ) : (
+        <p className="flex items-center gap-2 rounded-lg border border-dashed px-3 py-2.5 text-xs text-fg-subtle">
+          <Star className="h-3.5 w-3.5 shrink-0" />
+          No favorites yet. Star a tool to pin it here and in the sidebar.
+        </p>
+      )}
+    </section>
   );
 }
 
