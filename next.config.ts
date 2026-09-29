@@ -27,8 +27,12 @@ const isDesktopBuild = Boolean(process.env.TAURI_ENV_PLATFORM);
  *   swatches, gradients) and Tailwind's injected styles.
  * - `img-src https:` exists solely for the Open Graph preview tool, which loads
  *   a user-typed image URL only after an explicit "Load remote image" click.
- * - `connect-src 'self'` guarantees no tool can call an external service.
+ * - `connect-src` is 'self' plus the three hosts behind the IP Location tool:
+ *   ipwho.is and ipinfo.io (geolocation of a typed address) and ipify (the
+ *   visitor's own public address). Every one of those requests follows an
+ *   explicit click or Enter; no other tool can call an external service.
  */
+const lookupHosts = "https://ipwho.is https://ipinfo.io https://api.ipify.org https://api64.ipify.org";
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -37,7 +41,7 @@ const csp = [
   "font-src 'self'",
   "media-src 'self' blob:",
   "worker-src 'self' blob:",
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self' ${lookupHosts}${isDev ? " ws: wss:" : ""}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

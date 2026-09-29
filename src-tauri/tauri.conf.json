@@ -33,7 +33,7 @@
         "font-src": "'self'",
         "media-src": "'self' blob:",
         "worker-src": "'self' blob:",
-        "connect-src": "'self' ipc: http://ipc.localhost",
+        "connect-src": "'self' ipc: http://ipc.localhost https://ipwho.is https://ipinfo.io https://api.ipify.org https://api64.ipify.org",
         "object-src": "'none'",
         "base-uri": "'self'",
         "form-action": "'self'",

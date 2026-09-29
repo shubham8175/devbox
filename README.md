@@ -133,7 +133,7 @@ Every tool lives at `/tools/<id>`. The full registry is in `src/data/tools.ts`.
 | **Git** | Commit Builder, .gitignore Generator, Diff Viewer, Semver, npm Range Explainer |
 | **Web** | URL Toolbox, Meta Tags, Open Graph Preview, Device & Browser Info |
 | **CSS** | Color Converter, Unit Converter, Gradient, Box Shadow |
-| **Networking & Geo** | IP / CIDR, IP ↔ Integer, Coordinate Distance, Lat / Lng Formatter |
+| **Networking & Geo** | IP / CIDR, IP ↔ Integer, IP Location, Coordinate Distance, Lat / Lng Formatter |
 | **Generators** | UUID, Random ID, Mock Data |
 | **Utilities** | Unix Permissions, File Size, GST / VAT, Number Base, Bitwise, Stack Trace Cleaner, Log Pretty Printer |
 | **MongoDB** | ObjectId, Query Formatter |
@@ -169,9 +169,9 @@ Star any tool to pin it to **Favorites**. Recently used tools appear on the home
 
 ## Privacy and security
 
-- **No network calls with your data.** The Content Security Policy is `connect-src 'self'`. The only outbound request any tool can make is the Open Graph preview's optional "Load remote image" button, which asks your browser to fetch a URL you typed.
+- **No network calls with your data, with one labelled exception.** The Content Security Policy restricts `connect-src` to the site itself plus the geolocation services used by the IP Location tool. That tool sends the address you typed to [ipwho.is](https://ipwho.is) (or [ipinfo.io](https://ipinfo.io) when that fails) when you press **Look up**, and asks [ipify](https://www.ipify.org) for your own public address when you press **Detect my IP**. Nothing is sent while typing or on page load, and reserved addresses such as 192.168.x.x are answered locally. The only other outbound request is the Open Graph preview's optional "Load remote image" button, which asks your browser to fetch a URL you typed.
 - **No storage of input.** Tool input lives in React state and is gone when you close the tab. A Playwright test types a sentinel string into a tool, triggers a download, and asserts it never appears in any request, URL, cookie, `localStorage`, `sessionStorage` or IndexedDB.
-- **The offline cache holds only the app.** The service worker caches same-origin pages and build assets so tools work offline. It never sees a request carrying your input, because no tool makes one.
+- **The offline cache holds only the app.** The service worker caches same-origin pages and build assets so tools work offline. It never sees a request carrying your input: it ignores cross-origin requests, so the IP Location lookups pass straight through it. That tool needs a connection for public addresses; everything else works offline.
 - **Strict headers on the web build.** CSP, `X-Frame-Options`, `Referrer-Policy` and `Permissions-Policy` are set in `next.config.ts`. The desktop build applies an equivalent CSP from `src-tauri/tauri.conf.json`.
 - **Minimal desktop surface.** The Tauri shell exposes only `core:default`. No filesystem, shell, HTTP or dialog plugins reach the webview. Downloads are written to your Downloads folder by the Rust side and nothing else.
 - **Few dependencies.** Beyond React and Next: `lucide-react`, `qrcode`, `jsqr`, `yaml`, `sql-formatter` and `semver`. CSV, XML, JSONPath, EXIF, ZIP and diff logic are implemented in `src/lib/tools` and have no third-party code.

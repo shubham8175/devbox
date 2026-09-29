@@ -112,6 +112,7 @@ const definitions: ToolDefinition[] = [
   // ---- Networking & Geo
   { id: "cidr", name: "IP / CIDR Calculator", description: "Network, broadcast, mask and host range for IPv4.", category: "Networking & Geo", keywords: ["cidr", "subnet", "ip", "ipv4", "network", "mask", "broadcast", "hosts", "range", "vpc"], icon: Network },
   { id: "ip-converter", name: "IP ↔ Integer", description: "Convert IPv4 addresses to integers and back.", category: "Networking & Geo", keywords: ["ip", "integer", "ipv4", "number", "convert", "long", "decimal", "hex"], icon: HashIcon },
+  { id: "ip-lookup", name: "IP Location", description: "City, region, ISP, timezone and coordinates for any IP address.", category: "Networking & Geo", keywords: ["ip", "location", "geoip", "geolocation", "city", "country", "isp", "asn", "lookup", "whois", "my ip", "ipv6", "ipv4", "where is"], icon: Globe2 },
   { id: "distance", name: "Coordinate Distance", description: "Haversine distance between two lat/lng points.", category: "Networking & Geo", keywords: ["distance", "haversine", "latitude", "longitude", "gps", "km", "miles", "geo", "coordinates"], icon: MapPin },
   { id: "coordinates", name: "Lat / Lng Formatter", description: "Decimal degrees ↔ degrees, minutes, seconds.", category: "Networking & Geo", keywords: ["latitude", "longitude", "dms", "decimal degrees", "coordinates", "gps", "format", "geo"], icon: Compass },
   // ---- Generators

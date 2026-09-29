@@ -360,19 +360,19 @@ Next.js app (unchanged)  →  static export in out/  →  Tauri window (src-taur
 
 Security headers are set in `next.config.ts` for every route:
 
-- **Content-Security-Policy**: `default-src 'self'`; scripts only from self plus `'unsafe-inline'` (required by the App Router's hydration scripts on static pages); `connect-src 'self'`; `img-src` allows `https:` solely so the Open Graph preview can load a user-typed image after an explicit click; `frame-ancestors 'none'`; `object-src 'none'`; `upgrade-insecure-requests` in production.
+- **Content-Security-Policy**: `default-src 'self'`; scripts only from self plus `'unsafe-inline'` (required by the App Router's hydration scripts on static pages); `connect-src 'self'` plus `https://ipwho.is`, `https://ipinfo.io`, `https://api.ipify.org` and `https://api64.ipify.org` for the IP Location tool (mirrored in `src-tauri/tauri.conf.json`); `img-src` allows `https:` solely so the Open Graph preview can load a user-typed image after an explicit click; `frame-ancestors 'none'`; `object-src 'none'`; `upgrade-insecure-requests` in production.
 - **Permissions-Policy** disables camera, microphone, geolocation, payment, USB and other powerful features.
 - `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Strict-Transport-Security` with preload, `Cross-Origin-Opener-Policy: same-origin`, DNS prefetch off, no `X-Powered-By`.
 
 Application-level guarantees:
 
-- No fetch calls carry user input. The only outbound request any tool can make is the image load in the Open Graph preview, triggered by the user.
+- Only one tool sends user input off the device: IP Location (`src/lib/tools/ip-lookup.ts`) posts nothing but GETs `https://ipwho.is/<address>` (falling back to `https://ipinfo.io/<address>/json`) when the user presses Look up or an example chip, and GETs ipify when the user presses Detect my IP. Requests are never issued on load or while typing, reserved addresses (RFC 1918, loopback, link-local, ULA, multicast…) are recognised locally and never sent, and every request has a 10 s timeout. All three services are free, keyless and allow browser calls; ipwho.is allows about 10,000 lookups a month per visitor IP. The only other outbound request is the image load in the Open Graph preview, triggered by the user.
 - Hashing, HMAC, checksums and password generation use the Web Crypto API in the browser.
 - Error boundaries deliberately do not report errors. There is no telemetry.
 - The share target is GET-only and parsed on the client.
 - The service worker intercepts only same-origin GET requests, caches only pages and build assets, and never posts anything. No tool issues a request containing input, so nothing user-entered can reach the cache.
 
-When adding features, keep these invariants. In particular, do not add external script or style origins to the CSP, and do not introduce network calls.
+When adding features, keep these invariants. In particular, do not add external script or style origins to the CSP, and do not introduce network calls beyond the explicitly listed, user-triggered ones above.
 
 ## 13. Input limits and heavy work
 
@@ -410,7 +410,7 @@ Within tools, prefer returning typed error results from logic functions and rend
 | `npm start` | Serves the production output with the headers from `next.config.ts`. |
 | `npm run lint` | ESLint with the Next core-web-vitals and TypeScript presets. |
 | `npm test` | Vitest, single run of `src/**/*.test.ts`. `npm run test:watch` keeps it watching. |
-| `npm run test:e2e` | Playwright. Runs `npm run build`, starts `next start -p 3457`, drives Chromium through `e2e/*.spec.ts` (`workflow.spec.ts` for the tool and its privacy audit, `pwa.spec.ts` for the manifest, worker and offline behaviour). |
+| `npm run test:e2e` | Playwright. Runs `npm run build`, starts `next start -p 3457`, drives Chromium through `e2e/*.spec.ts` (`workflow.spec.ts` for the tool and its privacy audit, `pwa.spec.ts` for the manifest, worker and offline behaviour, `ip-lookup.spec.ts` for the one tool that calls external services: CSP allow-list, mocked and real lookups through the worker, fallback, Detect my IP and offline behaviour). |
 | `node scripts/generate-icons.mjs` | Regenerates the web app icons and the Apple touch icon. Manual, commit the output. |
 
 The app is designed for Vercel: static output served from the CDN with `headers()` applied at the edge. Any static host that can set response headers will also work; without the headers the app still functions but loses the CSP.
