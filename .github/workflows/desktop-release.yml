@@ -1,7 +1,13 @@
-# Builds the Tauri desktop installers and attaches them to a GitHub Release.
+# Builds the Tauri desktop installers and publishes them as a GitHub Release.
 # Trigger: push a tag like v0.2.0 (after bumping "version" in package.json,
 # which tauri.conf.json reads), or run it manually from the Actions tab.
-# The homepage "Download for macOS / Windows" pill links to the latest release.
+#
+# Exactly two files are published, with fixed names, so the homepage
+# "Download for macOS / Windows" pill (src/lib/site.ts) can point straight at
+#   https://github.com/shubham8175/devbox/releases/latest/download/DevBox-macOS.dmg
+#   https://github.com/shubham8175/devbox/releases/latest/download/DevBox-Windows-Setup.exe
+# The macOS build is a universal binary (Apple Silicon + Intel) so one .dmg
+# serves every Mac. The release is published immediately (not a draft).
 name: Desktop release
 
 on:
@@ -19,11 +25,13 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            args: --target aarch64-apple-darwin
-          - os: macos-latest
-            args: --target x86_64-apple-darwin
+            target: universal-apple-darwin
+            asset: DevBox-macOS.dmg
+            bundle_glob: src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
           - os: windows-latest
-            args: ""
+            target: ""
+            asset: DevBox-Windows-Setup.exe
+            bundle_glob: src-tauri/target/release/bundle/nsis/*-setup.exe
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -38,12 +46,50 @@ jobs:
         with:
           workspaces: src-tauri
       - run: npm ci
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build installer
+        run: npm run desktop:build -- ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+      - name: Rename installer to its fixed download name
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist-installer
+          files=( ${{ matrix.bundle_glob }} )
+          if [ "${#files[@]}" -ne 1 ] || [ ! -f "${files[0]}" ]; then
+            echo "Expected exactly one installer, found: ${files[*]}" >&2
+            exit 1
+          fi
+          mv "${files[0]}" "dist-installer/${{ matrix.asset }}"
+          ls -la dist-installer
+      - uses: actions/upload-artifact@v4
         with:
-          tagName: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}-manual-{1}', github.run_number, github.sha) }}
-          releaseName: DevBox ${{ github.ref_type == 'tag' && github.ref_name || 'manual build' }}
-          releaseBody: Desktop installers for macOS (.dmg) and Windows (.msi / .exe setup).
-          releaseDraft: true
-          args: ${{ matrix.args }}
+          name: ${{ matrix.asset }}
+          path: dist-installer/${{ matrix.asset }}
+          if-no-files-found: error
+
+  # Publishes once, after BOTH installers exist, so the "latest" release never
+  # goes live with a file missing.
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - run: ls -la installers
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_number) }}
+          name: DevBox ${{ github.ref_type == 'tag' && github.ref_name || format('manual build {0}', github.run_number) }}
+          body: |
+            Desktop app installers.
+
+            - **macOS** (Apple Silicon and Intel): `DevBox-macOS.dmg`
+            - **Windows** 10/11: `DevBox-Windows-Setup.exe`
+          draft: false
+          prerelease: false
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: |
+            installers/DevBox-macOS.dmg
+            installers/DevBox-Windows-Setup.exe

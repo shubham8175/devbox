@@ -43,7 +43,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["dmg", "nsis"],
     "category": "DeveloperTool",
     "shortDescription": "Developer tools that run in your browser.",
     "longDescription": "Free developer tools for JSON, APIs, regex, JWTs, images and more. Everything is processed locally, and no account is required.",
