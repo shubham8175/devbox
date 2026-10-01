@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { OutputGrid, OutputRow } from "@/components/output-row";
 import { CopyButton } from "@/components/copy-button";
+import { TimeCompare } from "@/components/time-compare";
+import { OBJECTID_COMPARE_SAMPLE, parseObjectIdValue, splitObjectIdPaste } from "@/lib/tools/time-compare";
 
 export function ObjectIdTool() {
   const [input, setInput] = useState("");
@@ -112,6 +114,17 @@ export function ObjectIdTool() {
           </div>
         ) : null}
       </Card>
+
+      <TimeCompare
+        id="oid-compare"
+        className="lg:col-span-5"
+        title="Compare"
+        description="Enter ObjectIds in separate fields to see how far apart they were created."
+        placeholder="6abdfda8bbf0fae5ba4b01bf"
+        sample={OBJECTID_COMPARE_SAMPLE}
+        parse={parseObjectIdValue}
+        splitPaste={splitObjectIdPaste}
+      />
     </div>
   );
 }

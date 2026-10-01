@@ -1,8 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Globe } from "lucide-react";
-import { parseUserAgent, UA_SAMPLE, UA_SAMPLES, type DeviceType } from "@/lib/tools/user-agent";
+import { Eraser, Globe } from "lucide-react";
+import {
+  compareUserAgents,
+  isUnrecognisedUserAgent,
+  MAX_UA_COMPARE,
+  parseUserAgent,
+  splitUserAgentPaste,
+  UA_COMPARE_SAMPLE,
+  UA_SAMPLE,
+  UA_SAMPLES,
+  userAgentSummary,
+  type DeviceType,
+} from "@/lib/tools/user-agent";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
@@ -13,6 +24,8 @@ import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { OutputGrid, OutputRow } from "@/components/output-row";
 import { CopyButton } from "@/components/copy-button";
+import { useValueList, ValueList } from "@/components/value-list";
+import { cn } from "@/lib/utils";
 
 const DEVICE_TONE: Record<DeviceType, "success" | "accent" | "warning" | "danger" | "neutral"> = {
   desktop: "accent",
@@ -144,6 +157,118 @@ export function UserAgentTool() {
           </Card>
         </>
       )}
+
+      <UserAgentCompare />
     </div>
+  );
+}
+
+/** "Compare user agents": one box per UA, then a fields × UAs table with differences from #1 highlighted. */
+function UserAgentCompare() {
+  const list = useValueList({ max: MAX_UA_COMPARE });
+  const { values, hasInput, reset } = list;
+
+  const parsed = useMemo(
+    () =>
+      values.flatMap((v, i) => {
+        const p = v.trim() ? parseUserAgent(v) : null;
+        return p && !isUnrecognisedUserAgent(p) ? [{ line: i + 1, ua: v.trim(), parsed: p }] : [];
+      }),
+    [values],
+  );
+  const rows = useMemo(() => compareUserAgents(parsed.map((p) => p.parsed)), [parsed]);
+  const differing = rows.filter((r) => !r.same).length;
+
+  const report = [
+    ...parsed.map((p) => `#${p.line} ${p.ua}`),
+    "",
+    ...rows.map((r) => `${r.label}: ${r.values.map((v, i) => `#${parsed[i].line} ${v || "—"}`).join(" | ")}${r.same ? "" : "  [differs]"}`),
+  ].join("\n");
+
+  const addOwnUa = () => {
+    // Read in the click handler only: navigator does not exist during SSR.
+    const own = navigator.userAgent;
+    const i = values.findIndex((v) => !v.trim());
+    reset(i === -1 ? [...values, own] : values.map((v, j) => (j === i ? own : v)));
+  };
+
+  return (
+    <Card className="shadow-card">
+      <CardHeader
+        title="Compare user agents"
+        description="One User-Agent per field. Fields that differ from #1 are highlighted."
+        actions={
+          <>
+            <Button size="sm" onClick={addOwnUa} disabled={values.length >= MAX_UA_COMPARE && values.every((v) => v.trim())}>
+              <Globe className="h-3.5 w-3.5" /> Use this browser&apos;s UA
+            </Button>
+            {!hasInput ? (
+              <Button size="sm" variant="ghost" onClick={() => reset(UA_COMPARE_SAMPLE)}>
+                Load sample
+              </Button>
+            ) : (
+              <Button size="sm" variant="ghost" onClick={() => reset([])}>
+                <Eraser className="h-3.5 w-3.5" /> Clear
+              </Button>
+            )}
+          </>
+        }
+      />
+
+      <ValueList
+        list={list}
+        id="ua-compare"
+        placeholder="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+        itemLabel="user agent"
+        splitPaste={splitUserAgentPaste}
+        status={(value) => {
+          const p = parseUserAgent(value);
+          return isUnrecognisedUserAgent(p) ? { tone: "error", content: "Not a recognised User-Agent." } : { tone: "ok", content: userAgentSummary(p) };
+        }}
+      />
+
+      {parsed.length >= 2 ? (
+        <div className="mt-4 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {differing ? <Badge tone="accent">{differing} of {rows.length} fields differ</Badge> : <Badge tone="success">All fields identical</Badge>}
+          </div>
+
+          <div className="overflow-x-auto rounded-lg border">
+            <table className="w-full min-w-[480px] table-fixed text-left text-sm">
+              <thead className="bg-bg-elevated text-[11px] uppercase tracking-wide text-fg-subtle">
+                <tr>
+                  <th className="w-32 px-3 py-2 font-medium">Field</th>
+                  {parsed.map((p) => (
+                    <th key={p.line} className="px-3 py-2 font-medium" title={p.ua}>
+                      #{p.line}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.key} className="border-t align-top">
+                    <td className={cn("whitespace-nowrap px-3 py-2", r.same ? "text-fg-subtle" : "font-medium text-fg")}>{r.label}</td>
+                    {r.values.map((v, i) => (
+                      <td key={parsed[i].line} className={cn("px-3 py-2", r.differs[i] ? "bg-warning-soft text-warning" : r.same ? "text-fg-muted" : "text-fg")}>
+                        {v || <span className="text-fg-subtle">—</span>}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex justify-end">
+            <CopyButton label="Copy report" value={report} />
+          </div>
+        </div>
+      ) : (
+        <p className="mt-4 text-xs text-fg-subtle">
+          {parsed.length === 1 ? "Add at least one more User-Agent to compare." : "Enter two or more User-Agent strings to compare them side by side."}
+        </p>
+      )}
+    </Card>
   );
 }

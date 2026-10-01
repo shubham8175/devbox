@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkContrast, composite, CONTRAST_PAIRS_SAMPLE, CONTRAST_SAMPLE, contrastRatio, formatRatio, suggestAccessible, swap, wcagGrades } from "@/lib/tools/contrast";
+import { checkContrast, checkPalette, PALETTE_SAMPLE, splitColors, composite, CONTRAST_PAIRS_SAMPLE, CONTRAST_SAMPLE, contrastRatio, formatRatio, suggestAccessible, swap, wcagGrades } from "@/lib/tools/contrast";
 import { parseColor, type RGBA } from "@/lib/tools/color";
 
 const c = (s: string): RGBA => {
@@ -110,5 +110,42 @@ describe("helpers and samples", () => {
       expect(checkContrast(p.fg, p.bg)).not.toBeNull();
     }
     expect(CONTRAST_PAIRS_SAMPLE.length).toBeGreaterThanOrEqual(8);
+  });
+});
+
+describe("splitColors", () => {
+  it("splits on newlines, commas, semicolons and spaces outside parentheses", () => {
+    expect(splitColors("#fff, #000\n#123456; abc")).toEqual(["#fff", "#000", "#123456", "abc"]);
+    expect(splitColors("rgb(0, 0, 0), hsl(210 50% 40% / .5)\nrgba(1,2,3,0.5) #fff")).toEqual([
+      "rgb(0, 0, 0)",
+      "hsl(210 50% 40% / .5)",
+      "rgba(1,2,3,0.5)",
+      "#fff",
+    ]);
+    expect(splitColors("  \n ,, ")).toEqual([]);
+  });
+});
+
+describe("checkPalette", () => {
+  it("grades the sample palette: two AA, one large-only, one fail", () => {
+    const r = checkPalette(PALETTE_SAMPLE.fgs, c(PALETTE_SAMPLE.bg));
+    expect(r.errors).toEqual([]);
+    expect(r.counts).toEqual({ normalAA: 2, largeOnly: 1, fail: 1 });
+    expect(r.best?.input).toBe("#1d4ed8");
+    expect(r.worst?.input).toBe("#facc15");
+  });
+
+  it("suggests a fix only for colours failing AA normal", () => {
+    const r = checkPalette(["#000", "#999"], c("#fff"));
+    expect(r.rows[0].suggestion).toBeNull();
+    const s = r.rows[1].suggestion;
+    expect(s?.ok).toBe(true);
+    if (s?.ok) expect(s.ratio).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("skips empty fields and reports unparseable ones with their field number", () => {
+    const r = checkPalette(["#000", "", "nope", "rgb(255, 0, 0)"], c("#fff"));
+    expect(r.errors).toEqual([{ line: 3, input: "nope" }]);
+    expect(r.rows.map((x) => x.line)).toEqual([1, 4]);
   });
 });

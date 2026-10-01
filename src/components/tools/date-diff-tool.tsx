@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { ArrowLeftRight } from "lucide-react";
-import { diffDates } from "@/lib/tools/date-diff";
+import { DATE_TIMELINE_SAMPLE, diffDates, parseTimelineValue } from "@/lib/tools/date-diff";
 import { toDatetimeLocalValue } from "@/lib/tools/time";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { OutputGrid, OutputRow } from "@/components/output-row";
+import { TimeCompare } from "@/components/time-compare";
+import { splitEpochPaste } from "@/lib/tools/time-compare";
 
 function fmt(n: number): string {
   return n.toLocaleString("en-US", { maximumFractionDigits: 3 });
@@ -113,6 +115,16 @@ export function DateDiffTool() {
           <p className="text-sm text-fg-subtle">Pick two dates to see the difference.</p>
         )}
       </Card>
+
+      <TimeCompare
+        id="date-timeline"
+        title="Timeline"
+        description="Enter several dates in separate fields to see the gap between each. Dates and date-times without a timezone are local; ISO strings and epoch seconds or milliseconds work too."
+        placeholder="2024-01-15 10:30"
+        sample={DATE_TIMELINE_SAMPLE}
+        parse={parseTimelineValue}
+        splitPaste={splitEpochPaste}
+      />
     </div>
   );
 }

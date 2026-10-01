@@ -1,4 +1,22 @@
 import { humanDuration, isValidDate, splitDuration } from "@/lib/tools/time";
+import { parseEpochValue, type ParsedValue } from "@/lib/tools/time-compare";
+
+/** Sample for the Timeline (multi-date) card; local date-times, like the two-date inputs above it. */
+/**
+ * Timeline values: like the epoch parser, except a bare date ("2024-01-15") is local midnight.
+ * JS reads date-only ISO strings as UTC, which would put them hours away from local date-times in the same list.
+ */
+export function parseTimelineValue(raw: string): ParsedValue {
+  const m = raw.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    if (isValidDate(d) && d.getDate() === Number(m[3])) return { date: d };
+    return { date: null, error: `${raw.trim()} is not a valid date.` };
+  }
+  return parseEpochValue(raw);
+}
+
+export const DATE_TIMELINE_SAMPLE = ["2024-01-15 09:00", "2024-03-01 17:30", "2024-12-31 23:59:59"];
 
 export interface DateDiffResult {
   ok: true;

@@ -39,11 +39,28 @@ Most online developer tools send your input to a server, wrap it in ads, and mak
 
 ### Epoch Converter
 
-Paste a Unix timestamp in seconds or milliseconds, or any ISO 8601 date, and get local time, UTC, ISO 8601, relative time and both Unix forms with one-click copy. The current time ticks live at the top so you always have "now" at hand.
+Paste a Unix timestamp in seconds or milliseconds, or any ISO 8601 date, and get local time, UTC, ISO 8601, relative time and both Unix forms with one-click copy. The current time ticks live at the top so you always have "now" at hand. Paste several timestamps into Compare to see the gap between each one and the total span. The ObjectId tool has the same Compare view for ObjectIds.
 
 <div align="center">
 <img src=".github/assets/epoch.png" alt="Epoch Converter showing 1700000000 converted to local, UTC, ISO 8601 and relative time" width="900" />
 </div>
+
+### Compare many values at once
+
+Thirteen tools have a Compare card with a separate box per value: press **Add more** or Enter to add a box, or paste a list to fill several at once.
+
+| Tool | What you compare |
+| --- | --- |
+| Epoch Converter, Date Difference | Timestamps and dates, with the gap between each and the total span |
+| MongoDB ObjectId, UUID (v1, v6, v7) | Creation times embedded in IDs |
+| JWT Decoder | Issued, not-before and expiry times across tokens, plus header and claim differences |
+| Timezone Converter | One time across many zones, with shared working hours |
+| Cron Helper | Upcoming runs of several schedules on one timeline, and when they collide |
+| IP / CIDR Calculator | Overlapping and nested ranges, total addresses and a collapsed list |
+| Coordinate Distance | A route through several points, leg by leg |
+| Contrast Checker | Several text colours on one background against WCAG |
+| Hash Generator, File Checksum | Which inputs or files are identical, and which match an expected hash |
+| User-Agent Parser | Browser, OS and device side by side |
 
 ### More top tools
 

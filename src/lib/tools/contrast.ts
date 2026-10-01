@@ -156,3 +156,90 @@ export const CONTRAST_PAIRS_SAMPLE: ContrastPair[] = [
   { name: "Black on white", fg: "#000000", bg: "#ffffff" },
   { name: "Placeholder grey", fg: "#9ca3af", bg: "#ffffff" },
 ];
+
+// ---------- Several foregrounds on one background ----------
+
+/** Upper bound on compared colours, so a huge paste can't render hundreds of rows. */
+export const MAX_PALETTE_COLORS = 50;
+
+/** A brand-ish palette on white: two pass AA, one only large text, one fails outright. */
+export const PALETTE_SAMPLE = { bg: "#ffffff", fgs: ["#1d4ed8", "#15803d", "#ea580c", "#facc15"] };
+
+/**
+ * Split a pasted palette into colours: newlines, ";", commas and whitespace
+ * separate values, except inside parentheses, so "rgb(0, 0, 0)" and
+ * "hsl(210 50% 40% / .5)" stay whole.
+ */
+export function splitColors(raw: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let cur = "";
+  const flush = () => {
+    if (cur.trim()) out.push(cur.trim());
+    cur = "";
+  };
+  for (const ch of raw) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    if (depth === 0 && /[\s,;]/.test(ch)) flush();
+    else cur += ch;
+  }
+  flush();
+  return out;
+}
+
+export interface PaletteRow {
+  /** Field number (1-based), so rows match the input boxes. */
+  line: number;
+  input: string;
+  fg: RGBA;
+  ratio: number;
+  grades: WcagGrades;
+  /** Nearest same-hue colour reaching 4.5:1; only set when the input fails AA normal. */
+  suggestion: Suggestion | SuggestionError | null;
+}
+
+export interface PaletteResult {
+  rows: PaletteRow[];
+  errors: Array<{ line: number; input: string }>;
+  /** Highest / lowest ratio rows (null when there are no valid rows). */
+  best: PaletteRow | null;
+  worst: PaletteRow | null;
+  /** Counts of rows passing AA normal, AA large only, and failing both. */
+  counts: { normalAA: number; largeOnly: number; fail: number };
+}
+
+/** Grade every non-empty foreground field against one background. Rows keep input order. */
+export function checkPalette(values: string[], bg: RGBA, target = 4.5): PaletteResult {
+  const rows: PaletteRow[] = [];
+  const errors: PaletteResult["errors"] = [];
+  values.forEach((raw, i) => {
+    const input = raw.trim();
+    if (!input) return;
+    const fg = parseColor(input);
+    if (!fg) {
+      errors.push({ line: i + 1, input });
+      return;
+    }
+    const ratio = contrastRatio(fg, bg);
+    const grades = wcagGrades(ratio);
+    rows.push({ line: i + 1, input, fg, ratio, grades, suggestion: grades.normalAA ? null : suggestAccessible(fg, bg, target) });
+  });
+  let best: PaletteRow | null = null;
+  let worst: PaletteRow | null = null;
+  for (const r of rows) {
+    if (!best || r.ratio > best.ratio) best = r;
+    if (!worst || r.ratio < worst.ratio) worst = r;
+  }
+  return {
+    rows,
+    errors,
+    best,
+    worst,
+    counts: {
+      normalAA: rows.filter((r) => r.grades.normalAA).length,
+      largeOnly: rows.filter((r) => !r.grades.normalAA && r.grades.largeAA).length,
+      fail: rows.filter((r) => !r.grades.largeAA).length,
+    },
+  };
+}

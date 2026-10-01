@@ -15,6 +15,8 @@ import { Alert } from "@/components/ui/alert";
 const EPOCH_SAMPLE = "1700000000";
 import { OutputGrid, OutputRow } from "@/components/output-row";
 import { CopyButton } from "@/components/copy-button";
+import { TimeCompare } from "@/components/time-compare";
+import { EPOCH_COMPARE_SAMPLE, parseEpochValue, splitEpochPaste } from "@/lib/tools/time-compare";
 
 const KIND_LABEL: Record<string, string> = {
   seconds: "Detected: Unix seconds",
@@ -115,6 +117,16 @@ export function EpochTool() {
           </p>
         ) : null}
       </Card>
+
+      <TimeCompare
+        id="epoch-compare"
+        title="Compare"
+        description="Enter timestamps in separate fields to see the gap between each."
+        placeholder="1700000000"
+        sample={EPOCH_COMPARE_SAMPLE}
+        parse={parseEpochValue}
+        splitPaste={splitEpochPaste}
+      />
     </div>
   );
 }

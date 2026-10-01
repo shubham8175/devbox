@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseUserAgent, UA_SAMPLE, UA_SAMPLES } from "@/lib/tools/user-agent";
+import { compareUserAgents, isUnrecognisedUserAgent, parseUserAgent, splitUserAgentPaste, UA_COMPARE_SAMPLE, UA_SAMPLE, UA_SAMPLES, userAgentSummary } from "@/lib/tools/user-agent";
 
 function sample(name: string): string {
   const s = UA_SAMPLES.find((x) => x.name === name);
@@ -172,5 +172,35 @@ describe("parseUserAgent: devices, OS and edge cases", () => {
     expect(r.evidence.map((e) => e.what)).toEqual(expect.arrayContaining(["Browser", "OS", "Engine"]));
     expect(UA_SAMPLES.length).toBeGreaterThanOrEqual(12);
     for (const s of UA_SAMPLES) expect(parseUserAgent(s.ua).browser.name).not.toBe("Unknown");
+  });
+});
+
+describe("compareUserAgents", () => {
+  it("summarises each sample UA in one line", () => {
+    const [desktop, iphone, android] = UA_COMPARE_SAMPLE.map(parseUserAgent);
+    expect(userAgentSummary(desktop)).toBe("Chrome 129 · Windows 10 / 11 · desktop");
+    expect(userAgentSummary(iphone)).toBe("Safari 17 · iOS 17.6.1 · mobile");
+    expect(userAgentSummary(android)).toMatch(/^Chrome 129 · Android 14 · mobile$/);
+  });
+
+  it("flags fields that differ from the first UA", () => {
+    const rows = compareUserAgents(UA_COMPARE_SAMPLE.map(parseUserAgent));
+    const row = (key: string) => rows.find((r) => r.key === key)!;
+    expect(row("browser").values).toEqual(["Chrome", "Safari", "Chrome"]);
+    expect(row("browser").differs).toEqual([false, true, false]);
+    expect(row("browser").same).toBe(false);
+    expect(row("device").differs).toEqual([false, true, true]);
+    expect(row("bot").same).toBe(true);
+  });
+
+  it("treats identical UAs as all-same", () => {
+    const rows = compareUserAgents([UA_SAMPLE, UA_SAMPLE].map(parseUserAgent));
+    expect(rows.every((r) => r.same)).toBe(true);
+  });
+
+  it("splits pasted lists on newlines only and spots junk", () => {
+    expect(splitUserAgentPaste("a b c\r\n\n  d e  \n")).toEqual(["a b c", "d e"]);
+    expect(isUnrecognisedUserAgent(parseUserAgent("hello there"))).toBe(true);
+    expect(isUnrecognisedUserAgent(parseUserAgent("curl/8.7.1"))).toBe(false);
   });
 });

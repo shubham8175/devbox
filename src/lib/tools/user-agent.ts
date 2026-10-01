@@ -403,3 +403,68 @@ export const UA_SAMPLES: Array<{ name: string; ua: string }> = [
 ];
 
 export const UA_SAMPLE = UA_SAMPLES[0].ua;
+
+/* ---------- Compare several user agents ---------- */
+
+/** Upper bound on compared UAs, so the side-by-side table stays readable. */
+export const MAX_UA_COMPARE = 10;
+
+/** Desktop Chrome, iPhone Safari and Android Chrome: three very different devices. */
+export const UA_COMPARE_SAMPLE = [
+  UA_SAMPLES[0].ua,
+  UA_SAMPLES[1].ua,
+  "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36",
+];
+
+/** Splits a pasted list into one UA per line (UAs contain spaces, so only newlines separate them). */
+export function splitUserAgentPaste(raw: string): string[] {
+  return raw
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
+/** True when nothing in the string was recognised: not a browser, bot, OS or engine we know. */
+export function isUnrecognisedUserAgent(p: ParsedUserAgent): boolean {
+  return p.browser.name === "Unknown" && p.os.name === "Unknown" && p.engine.name === "Unknown" && !p.isBot;
+}
+
+/** One-line description for a compare field, e.g. "Chrome 129 · Windows 10 / 11 · desktop". */
+export function userAgentSummary(p: ParsedUserAgent): string {
+  const withVer = (name: string, version: string) => (version ? `${name} ${version}` : name);
+  return [withVer(p.browser.name, p.browser.major), withVer(p.os.name, p.os.version), p.device.type].filter((s) => s && s !== "Unknown").join(" · ");
+}
+
+export const UA_COMPARE_FIELDS = [
+  { key: "browser", label: "Browser", get: (p: ParsedUserAgent) => p.browser.name },
+  { key: "version", label: "Version", get: (p: ParsedUserAgent) => p.browser.version },
+  { key: "engine", label: "Engine", get: (p: ParsedUserAgent) => p.engine.name },
+  { key: "engineVersion", label: "Engine version", get: (p: ParsedUserAgent) => p.engine.version },
+  { key: "os", label: "OS", get: (p: ParsedUserAgent) => p.os.name },
+  { key: "osVersion", label: "OS version", get: (p: ParsedUserAgent) => p.os.version },
+  { key: "device", label: "Device type", get: (p: ParsedUserAgent) => p.device.type },
+  { key: "vendor", label: "Vendor", get: (p: ParsedUserAgent) => p.device.vendor ?? "" },
+  { key: "model", label: "Model", get: (p: ParsedUserAgent) => p.device.model ?? "" },
+  { key: "bot", label: "Bot", get: (p: ParsedUserAgent) => (p.isBot ? "yes" : "no") },
+  { key: "flags", label: "Flags", get: (p: ParsedUserAgent) => p.flags.join(", ") },
+] as const;
+
+export interface UaCompareRow {
+  key: string;
+  label: string;
+  /** One value per compared UA, in order ("" when absent). */
+  values: string[];
+  /** Per value: whether it differs from the first UA's value (always false for the first). */
+  differs: boolean[];
+  /** True when every UA has the same value for this field. */
+  same: boolean;
+}
+
+/** Side-by-side field table: rows are fields, columns are the UAs, cells flagged where they differ from the first. */
+export function compareUserAgents(parsed: ParsedUserAgent[]): UaCompareRow[] {
+  return UA_COMPARE_FIELDS.map((f) => {
+    const values = parsed.map((p) => f.get(p));
+    const differs = values.map((v) => v !== values[0]);
+    return { key: f.key, label: f.label, values, differs, same: !differs.some(Boolean) };
+  });
+}

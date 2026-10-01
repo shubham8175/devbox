@@ -194,7 +194,7 @@ function humanize(fields: ParsedField[]): string {
   return clauses.join(" ") + ".";
 }
 
-function computeNextRuns(fields: ParsedField[], count: number, from: Date): Date[] {
+function computeNextRuns(fields: ParsedField[], count: number, from: Date, until?: Date): Date[] {
   const [min, hour, dom, mon, dow] = fields;
   const runs: Date[] = [];
   const d = new Date(from);
@@ -205,6 +205,7 @@ function computeNextRuns(fields: ParsedField[], count: number, from: Date): Date
   const dowRestricted = !dow.any;
   const limit = 366 * 24 * 60 * 5; // hard stop (5 years of minutes)
   for (let i = 0; i < limit && runs.length < count; i++) {
+    if (until && d > until) break;
     if (!mon.values.has(d.getMonth() + 1)) {
       d.setMonth(d.getMonth() + 1, 1);
       d.setHours(0, 0, 0, 0);
@@ -232,12 +233,14 @@ function computeNextRuns(fields: ParsedField[], count: number, from: Date): Date
   return runs;
 }
 
-export function explainCron(raw: string, now: Date = new Date()): CronResult {
+type ParsedCron = { ok: true; fields: CronField[]; parsed: ParsedField[] } | { ok: false; error: string; fields: CronField[] };
+
+function parseCron(raw: string): ParsedCron {
   let expr = raw.trim().replace(/\s+/g, " ");
-  if (!expr) return { ok: false, error: "Enter a cron expression.", fields: [], description: "", nextRuns: [] };
+  if (!expr) return { ok: false, error: "Enter a cron expression.", fields: [] };
   if (expr.startsWith("@")) {
     const preset = PRESETS[expr.toLowerCase()];
-    if (!preset) return { ok: false, error: `Unknown preset "${expr}".`, fields: [], description: "", nextRuns: [] };
+    if (!preset) return { ok: false, error: `Unknown preset "${expr}".`, fields: [] };
     expr = preset;
   }
   const tokens = expr.split(" ");
@@ -246,8 +249,6 @@ export function explainCron(raw: string, now: Date = new Date()): CronResult {
       ok: false,
       error: `Expected 5 fields (minute hour day-of-month month day-of-week), got ${tokens.length}.`,
       fields: tokens.map((raw, i) => ({ name: FIELD_DEFS[i]?.name ?? `Field ${i + 1}`, raw, description: "", valid: false })),
-      description: "",
-      nextRuns: [],
     };
   }
 
@@ -268,10 +269,31 @@ export function explainCron(raw: string, now: Date = new Date()): CronResult {
 
   if (!ok) {
     const first = fields.find((f) => !f.valid);
-    return { ok: false, error: `${first?.name}: ${first?.error}`, fields, description: "", nextRuns: [] };
+    return { ok: false, error: `${first?.name}: ${first?.error}`, fields };
   }
+  return { ok: true, fields, parsed };
+}
 
-  return { ok: true, fields, description: humanize(parsed), nextRuns: computeNextRuns(parsed, 5, now) };
+export function explainCron(raw: string, now: Date = new Date()): CronResult {
+  const p = parseCron(raw);
+  if (!p.ok) return { ok: false, error: p.error, fields: p.fields, description: "", nextRuns: [] };
+  return { ok: true, fields: p.fields, description: humanize(p.parsed), nextRuns: computeNextRuns(p.parsed, 5, now) };
+}
+
+/** Just the human description of an expression, or why it doesn't parse. */
+export function describeCron(raw: string): { description: string; error?: undefined } | { error: string } {
+  const p = parseCron(raw);
+  return p.ok ? { description: humanize(p.parsed) } : { error: p.error };
+}
+
+/**
+ * Runs strictly after `from` (local time), up to `count` of them and none later than `until`.
+ * Returns the parse error instead when the expression is invalid.
+ */
+export function cronRuns(raw: string, from: Date, count: number, until?: Date): { runs: Date[]; description: string; error?: undefined } | { error: string } {
+  const p = parseCron(raw);
+  if (!p.ok) return { error: p.error };
+  return { runs: computeNextRuns(p.parsed, count, from, until), description: humanize(p.parsed) };
 }
 
 export const CRON_EXAMPLES: Array<{ expr: string; label: string }> = [

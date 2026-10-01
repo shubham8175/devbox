@@ -15,3 +15,6 @@ export async function digestAll(text: string): Promise<Record<HashAlgorithm, str
   const results = await Promise.all(HASH_ALGORITHMS.map((a) => digest(a, text)));
   return Object.fromEntries(HASH_ALGORITHMS.map((a, i) => [a, results[i]])) as Record<HashAlgorithm, string>;
 }
+
+/** Sample for "Compare inputs": #1 and #3 are identical, #2 differs only by a trailing space. */
+export const HASH_COMPARE_SAMPLE = ["hello world", "hello world ", "hello world"];
